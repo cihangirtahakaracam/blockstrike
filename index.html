@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Block Strike: GitHub Endless Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #05080c; color: #fff; }
+        #blocker {
+            position: absolute; width: 100%; height: 100%; background: rgba(10, 15, 23, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20;
+            cursor: pointer; border: 4px solid #00f3ff;
+        }
+        #blocker h1 { font-size: 65px; color: #00f3ff; margin-bottom: 20px; letter-spacing: 6px; text-shadow: 0 0 25px #00f3ff; }
+        #blocker p { font-size: 22px; color: #fff; background: #ff4655; padding: 15px 35px; font-weight: bold; text-transform: uppercase; border-radius: 4px; box-shadow: 0 0 15px #ff4655; }
+        #blocker .info { margin-top: 25px; color: #888; text-align: center; font-size: 14px; line-height: 1.6; }
+        #game-interface { width: 100%; height: 100%; position: relative; display: block; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #00f3ff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
+        #hud { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 15px; font-size: 22px; font-weight: bold; z-index: 10; }
+        .hud-card { background: rgba(10, 18, 26, 0.9); padding: 12px 20px; border-left: 5px solid #00f3ff; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+        #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(10, 18, 26, 0.9); border: 3px solid #ff4655; border-radius: 8px; z-index: 10; }
+        #feed { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 26px; color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px #000; z-index: 10; text-align: center; }
+        #wave-banner { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ff4655; font-weight: bold; text-shadow: 0 0 20px #000; z-index: 10; text-align: center; }
+        #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+    <div id="blocker">
+        <h1>BLOCK STRIKE</h1>
+        <p>SAVAŞA BAŞLAMAK İÇİN TIKLA</p>
+        <div class="info">
+            <b>GitHub Ömür Boyu Sürüm:</b> Duvarların içinden geçme hatası tamamen engellendi!<br>
+            Silahlar: 1 (Bıçak), 2 (Tabanca), 3 (Tüfek), 4 (Sniper), 5 (Pompalı)
+        </div>
+    </div>
+
+    <div id="game-interface">
+        <div id="crosshair"></div>
+        <div id="feed"></div>
+        <div id="wave-banner"></div>
+        <canvas id="minimap" width="200" height="200"></canvas>
+        
+        <div id="hud">
+            <div class="hud-card" style="color: #ff4655;">CAN: <span id="hp-val">100</span></div>
+            <div class="hud-card" style="color: #00f3ff;">SİLAH: <span id="weapon-val">Tabanca</span></div>
+            <div class="hud-card" style="color: #ffb700;">SKOR: <span id="score-val">0</span></div>
+            <div class="hud-card" style="color: #ffffff; background: #ff4655;">DALGA: <span id="wave-val">1</span></div>
+        </div>
+
+        <div id="controls-desc">
+            <b>[W, A, S, D]</b> Hareket | <b>[SPACE]</b> Dengeli Zıplama<br>
+            <b>[LEFT SHIFT]</b> Eğilme | Duvara sürterek <b>W</b> ile <b>TIRMANMA</b><br>
+            <b>[SOL TIK]</b> Ateş Et / Yakından Bıçak Sapla
+        </div>
+    </div>
+
+    <script>
+        let playerStats = { hp: 100, score: 0, currentWeapon: 'Tabanca', weaponIndex: 1, wave: 1 };
+        let weaponsData = [
+            { name: 'Bıçak', range: 3, damage: 65, color: 0xcccccc, type: 'melee' },
+            { name: 'Tabanca', range: 40, damage: 35, color: 0x222222, type: 'range' },
+            { name: 'Otomatik Tüfek', range: 60, damage: 45, color: 0x1e3f20, type: 'range' },
+            { name: 'Sniper', range: 120, damage: 100, color: 0x5c1e1e, type: 'range' },
+            { name: 'Pompali', range: 16, damage: 85, color: 0x5c5c1e, type: 'range' }
+        ];
+
+        let scene, camera, renderer, player;
+        let moveF = false, moveB = false, moveL = false, moveR = false, isCrouch = false, isJump = false;
+        let yVel = 0;
+        let coverWalls = [], bots = [], potions = [], particles = [];
+        let minimapCanvas, minimapCtx;
+        let currentWeaponMesh;
+        let isWaveTransition = false;
+
+        const blocker = document.getElementById('blocker');
+
+        blocker.addEventListener('click', () => { renderer.domElement.requestPointerLock(); });
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === renderer.domElement) { blocker.style.display = 'none'; } 
+            else { blocker.style.display = 'flex'; }
+        });
+
+        init();
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x04060a);
+            scene.fog = new THREE.FogExp2(0x04060a, 0.025);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('game-interface').appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            let light = new THREE.DirectionalLight(0x00f3ff, 0.7);
+            light.position.set(30, 50, 20);
+            scene.add(light);
+
+            player = new THREE.Object3D();
+            player.position.set(0, 1.6, 5);
+            scene.add(player);
+            player.add(camera);
+
+            currentWeaponMesh = new THREE.Group();
+            currentWeaponMesh.position.set(0.25, -0.25, -0.5);
+            camera.add(currentWeaponMesh);
+
+            let floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x0f1318, roughness: 0.9 }));
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // SAKLANMA SIPERLERI
+            createCoverWall(0, 0, -15, 12, 6, 4, 0x2c3540);  
+            createCoverWall(-18, 0, -5, 6, 8, 6, 0x1e232a); 
+            createCoverWall(18, 0, -5, 6, 8, 6, 0x1e232a);  
+            createCoverWall(-12, 0, -30, 14, 10, 4, 0x15191e); 
+            createCoverWall(12, 0, -30, 14, 10, 4, 0x15191e);  
+            
+            // Sınır Duvarları
+            createCoverWall(0, 0, -60, 140, 20, 2, 0x0a0c10);
+            createCoverWall(-60, 0, 0, 2, 20, 140, 0x0a0c10);
+            createCoverWall(60, 0, 0, 2, 20, 140, 0x0a0c10);
+            createCoverWall(0, 0, 60, 140, 20, 2, 0x0a0c10);
+
+            spawnStaticPotion(0, -5);
+            spawnStaticPotion(-18, -15);
+            spawnStaticPotion(18, -15);
+
+            startZombieWave();
+            buildWeaponVisual();
+
+            minimapCanvas = document.getElementById('minimap');
+            minimapCtx = minimapCanvas.getContext('2d');
+
+            window.addEventListener('keydown', onKeyDown);
+            window.addEventListener('keyup', onKeyUp);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mousedown', onMouseClick);
+            window.addEventListener('resize', onWindowResize);
+
+            animate();
+        }
+
+        function createCoverWall(x, y, z, w, h, d, color) {
+            let geo = new THREE.BoxGeometry(w, h, d);
+            let mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.7 });
+            let mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, y + h/2, z);
+            scene.add(mesh);
+            coverWalls.push({ minX: x - w/2, maxX: x + w/2, minZ: z - d/2, maxZ: z + d/2, height: h });
+        }
+
+        function spawnStaticPotion(x, z) {
+            let group = new THREE.Group();
+            let bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.25, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x00ff44, emissive: 0x008811 }));
+            group.add(bottle); group.position.set(x, 0.3, z); scene.add(group); potions.push(group);
+        }
+
+        function startZombieWave() {
+            isWaveTransition = false;
+            document.getElementById('wave-banner').innerText = "";
+            document.getElementById('wave-val').innerText = playerStats.wave;
+            
+            let zombieCount = 2 + playerStats.wave; 
+            let hpMultiplier = 100 + (playerStats.wave - 1) * 25;
+            let speedMultiplier = 0.045 + (playerStats.wave - 1) * 0.008;
+            let damageMultiplier = 10 + (playerStats.wave - 1) * 3;
+
+            for (let i = 0; i < zombieCount; i++) {
+                let rx = (Math.random() - 0.5) * 80; let rz = -20 - Math.random() * 30;
+                if (checkWallCollision(rx, rz)) { rx += 5; rz -= 5; }
+
+                let zombieGroup = new THREE.Group();
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.7, 0.5), new THREE.MeshStandardMaterial({ color: 0x4a5759 }));
+                body.position.y = 0.85; zombieGroup.add(body);
+                let head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), new THREE.MeshStandardMaterial({ color: 0x232c2d }));
+                head.position.y = 1.8; zombieGroup.add(head);
+                let gun = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.85), new THREE.MeshStandardMaterial({ color: 0x000000 }));
+                gun.position.set(0.35, 1.1, -0.4); zombieGroup.add(gun);
+
+                zombieGroup.position.set(rx, 0, rz); scene.add(zombieGroup);
+
+                bots.push({ mesh: zombieGroup, hp: hpMultiplier, angle: Math.random() * Math.PI * 2, speed: Math.min(0.09, speedMultiplier), damage: damageMultiplier, lastAttack: 0 });
+            }
+            showFeed("DALGA " + playerStats.wave + " BAŞLADI!");
+        }
+
+        function buildWeaponVisual() {
+            while(currentWeaponMesh.children.length > 0){ currentWeaponMesh.remove(currentWeaponMesh.children[0]); }
+            let wep = weaponsData[playerStats.weaponIndex];
+
+            if (wep.name === 'Bıçak') {
+                let handle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.14), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+                handle.position.z = 0.04;
+                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.05, 0.22), new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 1, roughness: 0.1 }));
+                blade.position.z = -0.12; currentWeaponMesh.add(handle, blade);
+            } else if (wep.name === 'Tabanca') {
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.07, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 }));
+                let grip = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.1, 0.04), new THREE.MeshStandardMaterial({ color: 0x252525 }));
+                grip.position.set(0, -0.07, 0.04); grip.rotation.x = 0.25; currentWeaponMesh.add(body, grip);
+            } else {
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.09, 0.55), new THREE.MeshStandardMaterial({ color: wep.color }));
+                let barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.35), new THREE.MeshStandardMaterial({ color: 0x0a0a0a }));
+                barrel.rotation.x = Math.PI / 2; barrel.position.z = -0.38; currentWeaponMesh.add(body, barrel);
+                if(wep.name === 'Sniper') {
+                    let scope = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.18), new THREE.MeshStandardMaterial({ color: 0x000000 }));
+                    scope.rotation.x = Math.PI / 2; scope.position.y = 0.07; currentWeaponMesh.add(scope);
+                }
+            }
+        }
+
+        function processPhysics() {
+            let speed = isCrouch ? 0.04 : 0.09;
+            let fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
+            let side = new THREE.Vector3(); side.crossVectors(camera.up, fwd).normalize();
+
+            let moveVector = new THREE.Vector3(0, 0, 0);
+            if (moveF) moveVector.addScaledVector(fwd, speed);
+            if (moveB) moveVector.addScaledVector(fwd, -speed);
+            if (moveL) moveVector.addScaledVector(side, speed);
+            if (moveR) moveVector.addScaledVector(side, -speed);
+
+            player.position.x += moveVector.x; player.position.z += moveVector.z;
+
+            let pRadius = 0.55; 
+            coverWalls.forEach(w => {
+                if (player.position.x > w.minX - pRadius && player.position.x < w.maxX + pRadius &&
+                    player.position.z > w.minZ - pRadius && player.position.z < w.maxZ + pRadius) {
+                    let overlapX1 = player.position.x - (w.minX - pRadius);
+                    let overlapX2 = (w.maxX + pRadius) - player.position.x;
+                    let overlapZ1 = player.position.z - (w.minZ - pRadius);
+                    let overlapZ2 = (w.maxZ + pRadius) - player.position.z;
+                    let minOverlap = Math.min(overlapX1, overlapX2, overlapZ1, overlapZ2);
+
+                    if (minOverlap === overlapX1) player.position.x = w.minX - pRadius;
+                    else if (minOverlap === overlapX2) player.position.x = w.maxX + pRadius;
+                    else if (minOverlap === overlapZ1) player.position.z = w.minZ - pRadius;
+                    else if (minOverlap === overlapZ2) player.position.z = w.maxZ + pRadius;
+                    if (moveF) yVel = 0.07; 
+                }
+            });
+
+            yVel += -0.01; player.position.y += yVel;
+            let limitY = isCrouch ? 0.9 : 1.6;
+            if (player.position.y <= limitY) { player.position.y = limitY; yVel = 0; isJump = false; }
+
+            for(let i = potions.length - 1; i >= 0; i--) {
+                if(player.position.distanceTo(potions[i].position) < 1.5) {
+                    playerStats.hp = Math.min(100, playerStats.hp + 35);
+                    document.getElementById('hp-val').innerText = playerStats.hp;
+                    showFeed("CAN YENİLENDİ (+35 CAN)"); scene.remove(potions[i]); potions.splice(i, 1);
+                }
+            }
+        }
+
+        function checkWallCollision(x, z) {
+            for (let b of coverWalls) { if (x > b.minX - 0.5 && x < b.maxX + 0.5 && z > b.minZ - 0.5 && z < b.maxZ + 0.5) return true; }
+            return false;
+        }
+
+        function processZombies() {
+            let now = Date.now();
+            bots.forEach(zomb => {
+                let distance = zomb.mesh.position.distanceTo(player.position);
+                zomb.mesh.lookAt(new THREE.Vector3(player.position.x, zomb.mesh.position.y, player.position.z));
+
+                if (distance > 14) {
+                    zomb.mesh.position.x += Math.cos(zomb.angle) * zomb.speed;
+                    zomb.mesh.position.z += Math.sin(zomb.angle) * zomb.speed;
+                    if (checkWallCollision(zomb.mesh.position.x, zomb.mesh.position.z)) { zomb.angle += Math.PI / 2; }
+                } else {
+                    if (now - zomb.lastAttack > 1800) {
+                        playerStats.hp -= zomb.damage;
+                        document.getElementById('hp-val').innerText = playerStats.hp;
+                        showFeed("ZOMBİ SANA ATEŞ ETTİ! -" + zomb.damage);
+                        zomb.lastAttack = now;
+                        if(playerStats.hp <= 0) {
+                            showFeed("ELENDİN! OYUN BİTTİ.");
+                            setTimeout(() => { location.reload(); }, 2500);
+                        }
+                    }
+                }
+            });
+        }
+
+        function onMouseClick() {
+            if (document.pointerLockElement !== renderer.domElement || isWaveTransition) return;
+            currentWeaponMesh.position.z = -0.35; setTimeout(() => currentWeaponMesh.position.z = -0.5, 70);
+
+            let activeWep = weaponsData[playerStats.weaponIndex];
+            let raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+            let targets = bots.map(b => b.mesh.children[0]);
+            let hits = raycaster.intersectObjects(targets);
+
+            if (hits.length > 0) {
+                let hitDist = hits[0].distance;
+                if (activeWep.type === 'melee' && hitDist > activeWep.range) { showFeed("ÇOK UZAKTASIN!"); return; }
+
+                let targetBody = hits[0].object;
+                let activeBot = bots.find(b => b.mesh.children[0] === targetBody);
+
+                if (activeBot) {
+                    activeBot.hp -= activeWep.damage;
+                    showFeed("DÜŞMAN VURULDU!");
+                    if(activeWep.type === 'melee') activeBot.mesh.translateZ(-2.5); 
+
+                    if (activeBot.hp <= 0) {
+                        triggerFireDeath(activeBot.mesh.position);
+                        scene.remove(activeBot.mesh); bots = bots.filter(b => b !== activeBot);
+                        playerStats.score += 25; document.getElementById('score-val').innerText = playerStats.score;
+
+                        if (bots.length === 0 && !isWaveTransition) {
+                            isWaveTransition = true; playerStats.wave++;
+                            document.getElementById('wave-banner').innerText = "DALGA TAMAMLANDI!";
+                            setTimeout(startZombieWave, 4000);
+                        }
+                    }
+                }
+            }
+        }
+
+        function triggerFireDeath(pos) {
+            for (let i = 0; i < 20; i++) {
+                let p = new THREE.Mesh(new THREE.SphereGeometry(0.12, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff4655, transparent: true, opacity: 1 }));
+                p.position.set(pos.x + (Math.random()-0.5), pos.y + Math.random()*1.8, pos.z + (Math.random()-0.5));
+                scene.add(p); particles.push({ mesh: p, vY: Math.random() * 0.04 + 0.02, life: 35 });
+            }
+            if(Math.random() <= 0.50) { spawnStaticPotion(pos.x, pos.z); showFeed("İKSİR DÜŞTÜ!"); }
+        }
+
+        function processParticles() {
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i]; p.mesh.position.y += p.vY; p.mesh.material.opacity -= 0.03; p.life--;
+                if(p.life <= 0) { scene.remove(p.mesh); particles.splice(i, 1); }
+            }
+        }
+
+        function drawMinimap() {
+            minimapCtx.clearRect(0, 0, 200, 200); let cx = 100; let cz = 100;
+            minimapCtx.strokeStyle = "rgba(0, 243, 255, 0.4)"; minimapCtx.lineWidth = 2;
+            minimapCtx.getLineDash = [0]; minimapCtx.beginPath(); minimapCtx.arc(cx, cz, 98, 0, Math.PI*2); minimapCtx.stroke();
+
+            coverWalls.forEach(w => {
+                let bx = cx + ( (w.maxX + w.minX)/2 - player.position.x ) * 3.5;
+                let bz = cz + ( (w.maxZ + w.minZ)/2 - player.position.z ) * 3.5;
+                minimapCtx.fillStyle = "rgba(255, 255, 255, 0.2)"; minimapCtx.fillRect(bx - 12, bz - 12, 24, 24);
+            });
+            potions.forEach(pot => {
+                let px = cx + (pot.position.x - player.position.x) * 3.5;
+                let pz = cz + (pot.position.z - player.position.z) * 3.5;
+                minimapCtx.fillStyle = "#00ff44"; minimapCtx.fillRect(px - 3, pz - 3, 6, 6);
+            });
+            bots.forEach(b => {
+                let zx = cx + (b.mesh.position.x - player.position.x) * 3.5;
+                let zz = cz + (b.mesh.position.z - player.position.z) * 3.5;
+                minimapCtx.fillStyle = "#ff4655"; minimapCtx.beginPath(); minimapCtx.arc(zx, zz, 4.5, 0, Math.PI*2); minimapCtx.fill();
+            });
+            minimapCtx.fillStyle = "#00f3ff"; minimapCtx.beginPath(); minimapCtx.arc(cx, cz, 5.5, 0, Math.PI*2); minimapCtx.fill();
+        }
+
+        function showFeed(txt) {
+            let f = document.getElementById('feed'); f.innerText = txt;
+            clearTimeout(f.timer); f.timer = setTimeout(() => f.innerText = "", 2500);
+        }
+
+        function onKeyDown(e) {
+            switch (e.code) {
+                case 'KeyW': moveF = true; break;
+                case 'KeyS': moveB = true; break;
+                case 'KeyA': moveL = true; break;
+                case 'KeyD': moveR = true; break;
+                case 'Space': if(!isJump){ yVel = 0.21; isJump = true; } break;
+                case 'ShiftLeft': isCrouch = true; break;
+                case 'Digit1': swapWeapon(0); break;
+                case 'Digit2': swapWeapon(1); break;
+                case 'Digit3': swapWeapon(2); break;
+                case 'Digit4': swapWeapon(3); break;
+                case 'Digit5': swapWeapon(4); break;
+            }
+        }
+
+        function onKeyUp(e) {
+            switch (e.code) {
+                case 'KeyW': moveF = false; break;
+                case 'KeyS': moveB = false; break;
+                case 'KeyA': moveL = false; break;
+                case 'KeyD': moveR = false; break;
+                case 'ShiftLeft': isCrouch = false; break;
+            }
+        }
+
+        function swapWeapon(index) {
+            playerStats.weaponIndex = index; playerStats.currentWeapon = weaponsData[index].name;
+            document.getElementById('weapon-val').innerText = playerStats.currentWeapon;
+            showFeed(playerStats.currentWeapon.toUpperCase() + " KUŞANILDI"); buildWeaponVisual();
+        }
+
+        function onMouseMove(e) {
+            if (document.pointerLockElement !== renderer.domElement) return;
+            player.rotation.y -= e.movementX * 0.0025; camera.rotation.x -= e.movementY * 0.0025;
+            camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (document.pointerLockElement === renderer.domElement) { processPhysics(); processZombies(); processParticles(); }
+            drawMinimap(); renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
