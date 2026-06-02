@@ -2,13 +2,13 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Block Strike: Photo Skin Edition V8</title>
+    <title>Block Strike: Ultimate Fix V9</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Segoe UI', sans-serif; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #020406; color: #fff; }
         
-        /* ANA MENÜ (TURUNCU NEON) */
+        /* ANA MENÜ */
         .menu-panel {
             position: absolute; width: 100%; height: 100%;
             background: rgba(5, 8, 12, 0.85);
@@ -34,20 +34,24 @@
         .row { display: flex; margin-bottom: 18px; align-items: center; gap: 20px; font-size: 18px; }
         input[type="range"], select { padding: 8px; background: #141922; border: 1px solid #ff6600; color: white; border-radius: 4px; }
 
-        /* OYUN HUD SİSTEMİ */
+        /* OYUN ALANI VE HUD */
         #game-interface { width: 100%; height: 100%; position: relative; display: block; }
+        
+        /* 3D Ekranın Tam Oturması İçin Zorunlu CSS */
+        canvas.game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
         #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #ff6600; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
         #hud { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 15px; font-size: 22px; font-weight: bold; z-index: 10; }
         .hud-card { background: rgba(10, 18, 26, 0.95); padding: 12px 20px; border-left: 5px solid #ff6600; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
         #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(10, 18, 26, 0.9); border: 3px solid #ff6600; border-radius: 8px; z-index: 10; }
         #feed { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 26px; color: #ff6600; font-weight: bold; text-shadow: 0 0 10px #000; z-index: 10; text-align: center; }
         #wave-banner { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ffbb00; font-weight: bold; text-shadow: 0 0 20px #000; z-index: 10; text-align: center; }
-        #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #ff6600; }
+        #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #ff6600; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <!-- ================= ANA MENÜ (TURUNCU NEON) ================= -->
+    <!-- ================= ANA MENÜ ================= -->
     <div id="main-menu" class="menu-panel">
         <h1>BLOCK STRIKE</h1>
         <button class="btn" onclick="startGame()">SAVAŞI BAŞLAT (DALGA MODU)</button>
@@ -56,10 +60,10 @@
         <button class="btn" onclick="openPanel('settings-panel')">Ayarlar (Hassasiyet)</button>
     </div>
 
-    <!-- SİLAH KUŞANMA VE FOTOĞRAF SKİN PANELİ -->
+    <!-- SİLAH PENCERESİ -->
     <div id="arsenal-panel" class="sub-panel">
         <button class="close-btn" onclick="closePanels()">X</button>
-        <div class="panel-header">Özel Skin Tasarım Atölyesi</div>
+        <div class="panel-header">Silah Deposu</div>
         <div class="row">
             <label>Aktif Silah Seçimi:</label>
             <select id="weapon-select" onchange="updateWeaponSelection()">
@@ -70,15 +74,12 @@
                 <option value="4">Pompalı</option>
             </select>
         </div>
-        
-        <!-- 📸 İSTEDİĞİN FOTOĞRAF SEÇME ÖZELLİĞİ BURADA -->
         <div class="row" style="margin-top: 30px; flex-direction: column; align-items: flex-start;">
             <label style="color: #ff6600; font-weight: bold;">Kendi Fotoğrafını Silaha Giydir:</label>
             <button class="btn" style="width: 350px; border-color: #00f3ff;" onclick="document.getElementById('photo-skin-loader').click()">
-                🖼️ BİLGİSAYARDAN FOTOĞRAF SEÇ
+                🖼 shrink BİLGİSAYARDAN FOTOĞRAF SEÇ
             </button>
             <input type="file" id="photo-skin-loader" accept="image/*" style="display: none;" onchange="uploadCustomPhotoSkin(event)">
-            <p style="color: #888; font-size: 14px; margin-top: 10px;">Seçeceğin herhangi bir resim (JPG/PNG) anında elindeki aktif silaha kaplanır!</p>
         </div>
     </div>
 
@@ -99,7 +100,7 @@
     </div>
 
     <!-- ================= OYUN ALANI INTERFACE ================= -->
-    <div id="game-interface" style="display:none;">
+    <div id="game-interface">
         <div id="crosshair"></div>
         <div id="feed"></div>
         <div id="wave-banner"></div>
@@ -135,7 +136,8 @@
         let coverWalls = [], bots = [], potions = [], particles = [];
         let minimapCanvas, minimapCtx, currentWeaponMesh;
         let isWaveTransition = false, isGameActive = false;
-        let loadedCustomTexture = null; // Yüklenen fotoğraf hafızası
+        let loadedCustomTexture = null; 
+        let ignoreFirstMouseInput = false; // Fare sapıtmasını engelleyen koruma kilidi
 
         function openPanel(id) { closePanels(); document.getElementById(id).style.display = 'flex'; }
         function closePanels() {
@@ -152,26 +154,22 @@
             mouseSens = sliderVal * 0.0005;
         }
 
-        // 📸 FOTOĞRAFI OKUYUP 3D SİLAHA SARAN SİHİRLİ SCRIPT
         function uploadCustomPhotoSkin(event) {
             let file = event.target.files[0];
             if (!file) return;
-
             let reader = new FileReader();
             reader.onload = function(e) {
                 let textureLoader = new THREE.TextureLoader();
                 textureLoader.load(e.target.result, function(texture) {
-                    loadedCustomTexture = texture; // Resmi hafızaya al
-                    buildWeaponVisual(); // Silahı yeni resimle baştan çiz
-                    alert("Özel Fotoğraf Skininiz Başarıyla Silaha Giydirildi!");
+                    loadedCustomTexture = texture;
+                    buildWeaponVisual();
+                    alert("Özel Fotoğraf Skininiz Silaha Giydirildi!");
                 });
             };
             reader.readAsDataURL(file);
         }
 
         function startGame() {
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('game-interface').style.display = 'block';
             isGameActive = true;
             renderer.domElement.requestPointerLock();
         }
@@ -183,6 +181,7 @@
             } else {
                 document.getElementById('main-menu').style.display = 'none';
                 isGameActive = true;
+                ignoreFirstMouseInput = true; // Kilitlendiği an ilk hatalı kareyi görmezden gel
             }
         });
 
@@ -196,7 +195,10 @@
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+            
+            // 🛠️ FIX: Canvas elementine sınıf verip #game-interface içine bağlıyoruz ki ekran aşağı kaymasın!
+            renderer.domElement.classList.add("game-canvas");
+            document.getElementById('game-interface').appendChild(renderer.domElement);
 
             scene.add(new THREE.AmbientLight(0xffffff, 0.5));
             let light = new THREE.DirectionalLight(0xff6600, 0.8); 
@@ -317,7 +319,6 @@
             while(currentWeaponMesh.children.length > 0){ currentWeaponMesh.remove(currentWeaponMesh.children[0]); }
             let wep = weaponsData[playerStats.weaponIndex];
 
-            // Fotoğraf yüklendiyse onu materyal yap, yüklenmediyse düz rengi kullan
             let weaponMaterial;
             if (loadedCustomTexture) {
                 weaponMaterial = new THREE.MeshStandardMaterial({ map: loadedCustomTexture, roughness: 0.4 });
@@ -328,12 +329,12 @@
             if (wep.name === 'Bıçak') {
                 let handle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.14), new THREE.MeshStandardMaterial({ color: 0x222222 }));
                 handle.position.z = 0.04;
-                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.05, 0.22), weaponMaterial); // Fotoğraf buraya basılır
+                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.05, 0.22), weaponMaterial);
                 blade.position.z = -0.12; 
                 currentWeaponMesh.add(handle, blade);
             } else {
                 let length = wep.name === 'Tabanca' ? 0.25 : 0.55;
-                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, length), weaponMaterial); // Fotoğraf buraya basılır
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, length), weaponMaterial);
                 currentWeaponMesh.add(body);
 
                 let barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.3), new THREE.MeshStandardMaterial({ color: 0x0d0d0d }));
@@ -585,7 +586,13 @@
         }
 
         function onMouseMove(e) {
-            if (document.pointerLockElement !== renderer.domElement) return;
+            if (document.pointerLockElement !== renderer.domElement || !isGameActive) return;
+            
+            // 🛡️ İLK KARE KORUMASI: Eğer kilitlenme yeni açıldıysa ve büyük sapma varsa es geç
+            if (ignoreFirstMouseInput) {
+                ignoreFirstMouseInput = false;
+                return;
+            }
             if (Math.abs(e.movementX) > 100 || Math.abs(e.movementY) > 100) return;
             
             player.rotation.y -= e.movementX * mouseSens;
