@@ -2,13 +2,13 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Block Strike: Hollow Scope & Fleeing AI V12</title>
+    <title>Block Strike: Integrated Scope V13</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: sans-serif; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #010402; color: #fff; }
         
-        /* ANA MENÜ */
+        /* ANA MENÜ PANELDEN GÖRÜNTÜ ASLA GİTMEZ */
         .menu-panel {
             position: absolute; width: 100%; height: 100%;
             background: rgba(4, 10, 6, 0.9);
@@ -23,7 +23,7 @@
         }
         .btn:hover { background-color: #ff6600; box-shadow: 0 0 20px #ff6600; transform: scale(1.03); color: #000; }
         
-        /* ALT PANEL PENCERELERİ */
+        /* PENCERELER */
         .sub-panel {
             position: absolute; width: 80%; height: 80%; background: rgba(5, 12, 8, 0.98);
             border: 3px solid #ff6600; padding: 40px; display: none; flex-direction: column; z-index: 25;
@@ -34,7 +34,7 @@
         .row { display: flex; margin-bottom: 18px; align-items: center; gap: 20px; font-size: 18px; }
         input[type="range"], select { padding: 8px; background: #0b1a10; border: 1px solid #ff6600; color: white; border-radius: 4px; }
 
-        /* OYUN ALANI VE HUD */
+        /* HUD SİSTEMİ */
         #game-interface { width: 100%; height: 100%; position: relative; display: block; }
         canvas.game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         
@@ -52,23 +52,24 @@
     <!-- ================= ANA MENÜ ================= -->
     <div id="main-menu" class="menu-panel">
         <h1>BLOCK STRIKE</h1>
-        <button class="btn" onclick="startGame()">SAVAŞI BAŞLAT (TACTICAL MODE)</button>
+        <button class="btn" onclick="startGame()">SAVAŞI BAŞLAT (TACTICAL V13)</button>
         <button class="btn" onclick="openPanel('arsenal-panel')">Silah Kuşanma & Skin Atölyesi</button>
-        <button class="btn" onclick="openPanel('shop-panel')">Mağaza / İstihbarat</button>
+        <button class="btn" onclick="openPanel('shop-panel')">Mağaza / Taktik Rapor</button>
         <button class="btn" onclick="openPanel('settings-panel')">Ayarlar (Hassasiyet)</button>
     </div>
 
+    <!-- SKIN ATÖLYESİ -->
     <div id="arsenal-panel" class="sub-panel">
         <button class="close-btn" onclick="closePanels()">X</button>
         <div class="panel-header">Gelişmiş Arsenal Atölyesi</div>
         <div class="row">
             <label>Aktif Silah Seçimi:</label>
             <select id="weapon-select" onchange="updateWeaponSelection()">
-                <option value="1">Tabanca (Dürbünlü)</option>
+                <option value="1">Tabanca (Entegre Dürbünlü)</option>
                 <option value="0">Bıçak (Yakın Dövüş)</option>
-                <option value="2">Otomatik Tüfek (Dürbünlü)</option>
-                <option value="3">Sniper (Büyük Dürbünlü)</option>
-                <option value="4">Pompalı (Dürbünlü)</option>
+                <option value="2">Otomatik Tüfek (Entegre Dürbünlü)</option>
+                <option value="3">Sniper (Büyük Entegre Dürbünlü)</option>
+                <option value="4">Pompalı (Entegre Dürbünlü)</option>
             </select>
         </div>
         <div class="row" style="margin-top: 30px; flex-direction: column; align-items: flex-start;">
@@ -82,8 +83,8 @@
 
     <div id="shop-panel" class="sub-panel">
         <button class="close-btn" onclick="closePanels()">X</button>
-        <div class="panel-header">Siber Vadi Taktik Raporu</div>
-        <div class="row">Dürbün içi boşaltıldı! Zombiler artık haritanın her yerinde doğabilir ve canları azalınca arkalarını dönüp kaçabilirler!</div>
+        <div class="panel-header">Siber Vadi İstihbaratı</div>
+        <div class="row">Dürbün silaha tamamen birleştirildi! Sağ tıkla açıldığında namlu önünü kapatmaz, tam karşıyı delikten net görürsün!</div>
     </div>
 
     <div id="settings-panel" class="sub-panel">
@@ -112,8 +113,8 @@
 
         <div id="controls-desc">
             <b>[W, A, S, D]</b> Savaşçı Hareketi | <b>[SPACE]</b> Zıplama | <b>[LEFT SHIFT]</b> Eğilme<br>
-            <b>[SAĞ TIK] Delik Dürbünden Bak (Karşı Taraf Net Görünür)</b><br>
-            Zombiler canı azalınca kaçar! Haritanın ve dağların her yerine tırmanılabilir.
+            <b>[SAĞ TIK] Entegre Delik Dürbünden Bak (Görüş Açık)</b><br>
+            Zombiler haritanın her yerinde doğar ve canı azalınca arkasını dönüp kaçar!
         </div>
     </div>
 
@@ -219,7 +220,6 @@
             floorGrid.position.y = 0.01;
             scene.add(floorGrid);
 
-            // Bütün harita yemyeşil çim kaplama yapıldı
             let floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x112a14, roughness: 0.9 }));
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
@@ -340,7 +340,6 @@
             group.add(bottle); group.position.set(x, 0.3, z); scene.add(group); potions.push(group);
         }
 
-        // 🧟‍♂️ İSTEDİĞİN HARİTANIN HER YERİNDE DOĞABİLEN GERÇEKÇİ BOT SİSTEMİ
         function startZombieWave() {
             isWaveTransition = false;
             document.getElementById('wave-banner').innerText = "";
@@ -352,21 +351,17 @@
             let damageMultiplier = 10 + (playerStats.wave - 1) * 3;
 
             for (let i = 0; i < zombieCount; i++) {
-                // 🗺️ HARİTANIN TAMAMINDA DOĞMA SİSTEMİ (-50 ile +50 arası her yerde)
                 let rx = (Math.random() - 0.5) * 100; 
                 let rz = (Math.random() - 0.5) * 100; 
                 if (checkWallCollision(rx, rz)) { rx += 6; rz -= 6; }
 
                 let zombieGroup = new THREE.Group();
-                
-                // Daha Gerçekçi Anatomik Yapı (Gövde + Eklem Detayları)
                 let body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.2, 0.45), new THREE.MeshStandardMaterial({ color: 0x2a363b }));
                 body.position.y = 1.0;
                 let armor = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.45, 0.52), new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.6 }));
                 armor.position.set(0, 1.15, 0);
                 zombieGroup.add(body, armor);
 
-                // Omuz Koruyucu Siber Eklemler
                 let shoulderL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 0.2), new THREE.MeshStandardMaterial({ color: 0xff4655 }));
                 shoulderL.position.set(-0.42, 1.1, 0);
                 let shoulderR = shoulderL.clone(); shoulderR.position.x = 0.42;
@@ -388,7 +383,6 @@
                 zombieGroup.position.set(rx, 0, rz);
                 scene.add(zombieGroup);
 
-                // Max HP kaydı (kaçma lojiği için gerekli)
                 bots.push({ 
                     mesh: zombieGroup, 
                     hp: hpMultiplier, 
@@ -397,13 +391,13 @@
                     speed: Math.min(0.09, speedMultiplier), 
                     damage: damageMultiplier, 
                     lastAttack: 0,
-                    isFleeing: false // Kaçma durumu kontrolü
+                    isFleeing: false 
                 });
             }
             showFeed("DALGA " + playerStats.wave + " BAŞLADI!");
         }
 
-        // 🎯 İSTEDİĞİN İÇİ DELİK SİLİNDİR DÜRBÜN (HOLLOW SCOPE) MOTORU
+        // ================= 🔫 SİLAH VE ENTEGRE DÜRBÜN BİRLEŞTİRME ATÖLYESİ =================
         function buildWeaponVisual() {
             while(currentWeaponMesh.children.length > 0){ currentWeaponMesh.remove(currentWeaponMesh.children[0]); }
             let wep = weaponsData[playerStats.weaponIndex];
@@ -422,24 +416,30 @@
                 blade.position.z = -0.12; 
                 currentWeaponMesh.add(handle, blade);
             } else {
-                // Silah Ana Gövdesi (Dürbünün alt hizasında kalır)
                 let length = wep.name === 'Tabanca' ? 0.25 : 0.55;
-                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, length), weaponMaterial);
-                body.position.y = -0.02; // Dürbün merkezini tıkamasın diye gövdeyi hafif indirdik
+                
+                // 1. Silah Ana Gövdesi (Görüşü kapatmaması için y=-0.04 seviyesine indirildi)
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, length), weaponMaterial);
+                body.position.y = -0.04; 
                 currentWeaponMesh.add(body);
 
+                // 2. 🛠️ DÜRBÜN AYAĞI / BAĞLANTISI (Silah ile dürbünü tek parça yapan köprü)
+                let scopeMount = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.04, 0.06), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.7 }));
+                scopeMount.position.set(0, -0.01, -0.02);
+                currentWeaponMesh.add(scopeMount);
+
+                // 3. Ateş Namlusu
                 let barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.3), new THREE.MeshStandardMaterial({ color: 0x0d0d0d }));
-                barrel.rotation.x = Math.PI / 2; barrel.position.set(0, -0.02, -(length/2 + 0.15));
+                barrel.rotation.x = Math.PI / 2; barrel.position.set(0, -0.04, -(length/2 + 0.15));
                 currentWeaponMesh.add(barrel);
 
-                // 🛠️ İÇİ DELİK SİLİNDİR DÜRBÜN (openEnded: true & DoubleSide)
+                // 4. 🎯 İÇİ TAMAMEN DELİK SİLİNDİR DÜRBÜN (Gövdeye Kaynaklı)
                 let scopeLength = wep.name === 'Sniper' ? 0.24 : 0.14;
-                // Parametrelerdeki son 'true' değeri silindirin kapaklarını söker, içini tamamen delik tüp yapar!
                 let scopeGeo = new THREE.CylinderGeometry(0.026, 0.026, scopeLength, 16, 1, true); 
                 let scopeMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.4, side: THREE.DoubleSide });
                 let scope = new THREE.Mesh(scopeGeo, scopeMat);
                 scope.rotation.x = Math.PI / 2;
-                scope.position.set(0, 0.07, -0.02); // Y ekseninde tam 0.07 yukarda durur
+                scope.position.set(0, 0.03, -0.02); // Y ekseninde tam 0.03 yukarda (Göz seviyesinde)
                 currentWeaponMesh.add(scope);
             }
         }
@@ -509,36 +509,30 @@
             return false;
         }
 
-        // 🧠 AKILLI KAÇIŞ SİSTEMLİ (FLEEING AI) ZOMBİ MOTORU
         function processZombies() {
             let now = Date.now();
             bots.forEach(zomb => {
                 let distance = zomb.mesh.position.distanceTo(player.position);
                 
-                // 🚨 KAÇMA KONTROLÜ: Eğer canı %40'ın altına indiyse kaçma modunu aç!
                 if (zomb.hp < zomb.maxHp * 0.40) {
                     if (!zomb.isFleeing) {
                         zomb.isFleeing = true;
-                        showFeed("ZOMBİ PANİK YAPTI! KAÇIYOR!");
+                        showFeed("BOT PANİK YAPTI! KAÇIYOR!");
                     }
                 }
 
                 if (zomb.isFleeing) {
-                    // Senden tam ters yöne kaçacak açı hesaplaması
                     let fleeAngle = Math.atan2(zomb.mesh.position.z - player.position.z, zomb.mesh.position.x - player.position.x);
                     zomb.mesh.rotation.y = -fleeAngle + Math.PI / 2;
 
-                    // Korkudan %40 daha hızlı koşarlar!
                     zomb.mesh.position.x += Math.cos(fleeAngle) * (zomb.speed * 1.4);
                     zomb.mesh.position.z += Math.sin(fleeAngle) * (zomb.speed * 1.4);
 
-                    // Duvara toslarsa yön değiştirip kaçmaya devam etsin
                     if (checkWallCollision(zomb.mesh.position.x, zomb.mesh.position.z)) {
                         zomb.mesh.position.x -= Math.cos(fleeAngle) * (zomb.speed * 3);
                         zomb.mesh.position.z -= Math.sin(fleeAngle) * (zomb.speed * 3);
                     }
                 } else {
-                    // Normal Durum: Oyuncuya kilitlenip avlama modu
                     zomb.mesh.lookAt(new THREE.Vector3(player.position.x, zomb.mesh.position.y, player.position.z));
 
                     if (distance > 14) {
@@ -591,7 +585,7 @@
                 
                 if (isAiming) {
                     camera.fov = playerStats.weaponIndex === 3 ? 14 : 32; 
-                    showFeed("DELİK NİŞANGAH: ODAKLANILDI");
+                    showFeed("DÜRBÜN MERCEĞİ KİLİTLENDİ");
                 } else {
                     camera.fov = 75; 
                     showFeed("NORMAL GÖRÜŞ");
@@ -656,18 +650,15 @@
             }
         }
 
-        // BÜTÜN HARİTAYI CANLI GÖSTEREN RADAR RADAR SİSTEMİ
         function drawMinimap() {
             minimapCtx.clearRect(0, 0, 200, 200); let cx = 100; let cz = 100;
             
-            // 🟢 RADAR ARKA PLANI YEMYEŞİL YAPILDI
             minimapCtx.fillStyle = "#112a14";
             minimapCtx.beginPath(); minimapCtx.arc(cx, cz, 98, 0, Math.PI*2); minimapCtx.fill();
             
             minimapCtx.strokeStyle = "rgba(255, 102, 0, 0.5)"; minimapCtx.lineWidth = 2;
             minimapCtx.stroke();
 
-            // Dağlar ve Siper Yapıları
             coverWalls.forEach(w => {
                 let bx = cx + ( (w.maxX + w.minX)/2 - player.position.x ) * 3.5;
                 let bz = cz + ( (w.maxZ + w.minZ)/2 - player.position.z ) * 3.5;
@@ -681,7 +672,6 @@
             bots.forEach(b => {
                 let zx = cx + (b.mesh.position.x - player.position.x) * 3.5;
                 let zz = cz + (b.mesh.position.z - player.position.z) * 3.5;
-                // Canı azalıp kaçan zombiler sarı, saldıranlar kırmızı görünür
                 minimapCtx.fillStyle = b.isFleeing ? "#ffbb00" : "#ff4655"; 
                 minimapCtx.beginPath(); minimapCtx.arc(zx, zz, 4.5, 0, Math.PI*2); minimapCtx.fill();
             });
@@ -764,13 +754,14 @@
                 processZombies();
                 processParticles();
 
-                // ================= 🎯 HİZALANMIŞ KUSURSUZ BOŞ MERCEK DÜRBÜN KONUMU SCRIPT =================
+                // ================= 🎯 HİZALANMIŞ KUSURSUZ ENTEGRE DÜRBÜN MATRİSİ =================
                 let targetWeaponPos = new THREE.Vector3(0.25, -0.25, -0.5); 
                 let targetWeaponScale = new THREE.Vector3(1, 1, 1);
 
                 if (isAiming && playerStats.weaponIndex !== 0) { 
-                    // 🛠️ DÜRBÜN MERKEZLEME FIX: Silahı tam olarak y=-0.07'ye kaydırdık. Böylece namlunun üstündeki 0.07 yüksekliğindeki dürbün deliği tam kameranın sıfır noktasına oturur ve iç poligonlar gözükmeden karşı tarafı gösterir!
-                    targetWeaponPos.set(0, -0.07, -0.22); 
+                    // 🛠️ DÜRBÜN ALIGNMENT FIX: Silahın bağlantılı dürbün deliğini (y=0.03) tam olarak göz hizasına getirmek için silahı -0.03'e çekiyoruz.
+                    // Böylece tam deliğin içinden tertemiz bir görüş sağlanır, poligon boşlukları görünmez!
+                    targetWeaponPos.set(0, -0.03, -0.22); 
                     targetWeaponScale.set(2.4, 2.4, 1.2); 
                 }
                 
