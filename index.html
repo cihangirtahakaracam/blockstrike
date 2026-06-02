@@ -2,13 +2,13 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Block Strike: Radar Direction V7</title>
+    <title>Block Strike: Photo Skin Edition V8</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Segoe UI', sans-serif; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #020406; color: #fff; }
         
-        /* ANA MENÜ (ARKASI ŞEFFAF - ARTIK GÖRÜNTÜ ASLA GİTMEZ) */
+        /* ANA MENÜ (TURUNCU NEON) */
         .menu-panel {
             position: absolute; width: 100%; height: 100%;
             background: rgba(5, 8, 12, 0.85);
@@ -47,26 +47,38 @@
 </head>
 <body>
 
+    <!-- ================= ANA MENÜ (TURUNCU NEON) ================= -->
     <div id="main-menu" class="menu-panel">
         <h1>BLOCK STRIKE</h1>
         <button class="btn" onclick="startGame()">SAVAŞI BAŞLAT (DALGA MODU)</button>
-        <button class="btn" onclick="openPanel('arsenal-panel')">Silah Kuşanma</button>
+        <button class="btn" onclick="openPanel('arsenal-panel')">Silah Kuşanma & Skin</button>
         <button class="btn" onclick="openPanel('shop-panel')">Mağaza / Ekonomi</button>
         <button class="btn" onclick="openPanel('settings-panel')">Ayarlar (Hassasiyet)</button>
     </div>
 
+    <!-- SİLAH KUŞANMA VE FOTOĞRAF SKİN PANELİ -->
     <div id="arsenal-panel" class="sub-panel">
         <button class="close-btn" onclick="closePanels()">X</button>
-        <div class="panel-header">Silah Deposu (Dürbünlü Sürüm)</div>
+        <div class="panel-header">Özel Skin Tasarım Atölyesi</div>
         <div class="row">
             <label>Aktif Silah Seçimi:</label>
             <select id="weapon-select" onchange="updateWeaponSelection()">
-                <option value="1">Tabanca (Dürbünlü)</option>
-                <option value="0">Bıçak (Yakın Dövüş)</option>
-                <option value="2">Otomatik Tüfek (Dürbünlü)</option>
-                <option value="3">Sniper (Büyük Dürbünlü)</option>
-                <option value="4">Pompalı (Dürbünlü)</option>
+                <option value="1">Tabanca</option>
+                <option value="0">Bıçak</option>
+                <option value="2">Otomatik Tüfek</option>
+                <option value="3">Sniper</option>
+                <option value="4">Pompalı</option>
             </select>
+        </div>
+        
+        <!-- 📸 İSTEDİĞİN FOTOĞRAF SEÇME ÖZELLİĞİ BURADA -->
+        <div class="row" style="margin-top: 30px; flex-direction: column; align-items: flex-start;">
+            <label style="color: #ff6600; font-weight: bold;">Kendi Fotoğrafını Silaha Giydir:</label>
+            <button class="btn" style="width: 350px; border-color: #00f3ff;" onclick="document.getElementById('photo-skin-loader').click()">
+                🖼️ BİLGİSAYARDAN FOTOĞRAF SEÇ
+            </button>
+            <input type="file" id="photo-skin-loader" accept="image/*" style="display: none;" onchange="uploadCustomPhotoSkin(event)">
+            <p style="color: #888; font-size: 14px; margin-top: 10px;">Seçeceğin herhangi bir resim (JPG/PNG) anında elindeki aktif silaha kaplanır!</p>
         </div>
     </div>
 
@@ -86,7 +98,8 @@
         <button class="btn" style="margin-top:20px;" onclick="closePanels()">Ayarları Kaydet</button>
     </div>
 
-    <div id="game-interface">
+    <!-- ================= OYUN ALANI INTERFACE ================= -->
+    <div id="game-interface" style="display:none;">
         <div id="crosshair"></div>
         <div id="feed"></div>
         <div id="wave-banner"></div>
@@ -122,6 +135,7 @@
         let coverWalls = [], bots = [], potions = [], particles = [];
         let minimapCanvas, minimapCtx, currentWeaponMesh;
         let isWaveTransition = false, isGameActive = false;
+        let loadedCustomTexture = null; // Yüklenen fotoğraf hafızası
 
         function openPanel(id) { closePanels(); document.getElementById(id).style.display = 'flex'; }
         function closePanels() {
@@ -138,9 +152,26 @@
             mouseSens = sliderVal * 0.0005;
         }
 
-        // Oyunu Başlatma (Görüntü sorununu çözen kilit)
+        // 📸 FOTOĞRAFI OKUYUP 3D SİLAHA SARAN SİHİRLİ SCRIPT
+        function uploadCustomPhotoSkin(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let textureLoader = new THREE.TextureLoader();
+                textureLoader.load(e.target.result, function(texture) {
+                    loadedCustomTexture = texture; // Resmi hafızaya al
+                    buildWeaponVisual(); // Silahı yeni resimle baştan çiz
+                    alert("Özel Fotoğraf Skininiz Başarıyla Silaha Giydirildi!");
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
         function startGame() {
             document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game-interface').style.display = 'block';
             isGameActive = true;
             renderer.domElement.requestPointerLock();
         }
@@ -189,7 +220,6 @@
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // TURUNCU NEON SIPIERLER
             createCyberWall(0, 0, -15, 14, 5, 4, 0x161c2e);  
             createCyberWall(-20, 0, -5, 6, 7, 6, 0x111625); 
             createCyberWall(20, 0, -5, 6, 7, 6, 0x111625);  
@@ -287,15 +317,23 @@
             while(currentWeaponMesh.children.length > 0){ currentWeaponMesh.remove(currentWeaponMesh.children[0]); }
             let wep = weaponsData[playerStats.weaponIndex];
 
+            // Fotoğraf yüklendiyse onu materyal yap, yüklenmediyse düz rengi kullan
+            let weaponMaterial;
+            if (loadedCustomTexture) {
+                weaponMaterial = new THREE.MeshStandardMaterial({ map: loadedCustomTexture, roughness: 0.4 });
+            } else {
+                weaponMaterial = new THREE.MeshStandardMaterial({ color: wep.color, roughness: 0.5 });
+            }
+
             if (wep.name === 'Bıçak') {
                 let handle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.14), new THREE.MeshStandardMaterial({ color: 0x222222 }));
                 handle.position.z = 0.04;
-                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.05, 0.22), new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 1 }));
+                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.05, 0.22), weaponMaterial); // Fotoğraf buraya basılır
                 blade.position.z = -0.12; 
                 currentWeaponMesh.add(handle, blade);
             } else {
                 let length = wep.name === 'Tabanca' ? 0.25 : 0.55;
-                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, length), new THREE.MeshStandardMaterial({ color: wep.color }));
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, length), weaponMaterial); // Fotoğraf buraya basılır
                 currentWeaponMesh.add(body);
 
                 let barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.3), new THREE.MeshStandardMaterial({ color: 0x0d0d0d }));
@@ -391,7 +429,6 @@
                         document.getElementById('hp-val').innerText = playerStats.hp;
                         showFeed("SİLAHLI BOT ATEŞ ETTİ! -" + zomb.damage);
                         
-                        // Kırmızı lazer mermi izleyicisi
                         createEnemyLaserTracer(zomb.mesh.position, player.position);
                         
                         zomb.lastAttack = now;
@@ -474,7 +511,6 @@
             }
         }
 
-        // ================= YÖN GÖSTERGELİ ENİ NESİL RADAR (MINIMAP) =================
         function drawMinimap() {
             minimapCtx.clearRect(0, 0, 200, 200); let cx = 100; let cz = 100;
             minimapCtx.strokeStyle = "rgba(255, 102, 0, 0.4)"; minimapCtx.lineWidth = 2;
@@ -496,19 +532,16 @@
                 minimapCtx.fillStyle = "#ff4655"; minimapCtx.beginPath(); minimapCtx.arc(zx, zz, 4.5, 0, Math.PI*2); minimapCtx.fill();
             });
             
-            // Oyuncu Merkez Noktası (Mavi Merkez)
             minimapCtx.fillStyle = "#00f3ff";
             minimapCtx.beginPath(); minimapCtx.arc(cx, cz, 5.5, 0, Math.PI*2); minimapCtx.fill();
 
-            // 🎯 İSTEDİĞİN BAKTIĞIMIZ YÖNÜ GÖSTEREN SİBER LAZER OKU (Radar Direction Indicator)
             let fwdVec = new THREE.Vector3();
-            camera.getWorldDirection(fwdVec); // Kameranın 3D yön vektörünü alıyoruz
+            camera.getWorldDirection(fwdVec); 
             
             minimapCtx.strokeStyle = "#00f3ff";
             minimapCtx.lineWidth = 3;
             minimapCtx.beginPath();
             minimapCtx.moveTo(cx, cz);
-            // 2D haritaya izdüşüm formülü (X ve Z koordinatları ile oka yön veriyoruz)
             minimapCtx.lineTo(cx + fwdVec.x * 20, cz + fwdVec.z * 20); 
             minimapCtx.stroke();
         }
@@ -551,11 +584,8 @@
             showFeed(playerStats.currentWeapon.toUpperCase() + " KUŞANILDI"); buildWeaponVisual();
         }
 
-        // 🛡️ BÜYÜK FARE SAPIKLIĞINI/GLITCH HATASINI ÖNLEYEN FİLTRELİ MOTOR
         function onMouseMove(e) {
             if (document.pointerLockElement !== renderer.domElement) return;
-            
-            // 🚫 FARE KİLİDİ FİLTRESİ: Eğer ani kayma tek bir karede 100 pikseli geçerse tarayıcı hatasıdır, yok say!
             if (Math.abs(e.movementX) > 100 || Math.abs(e.movementY) > 100) return;
             
             player.rotation.y -= e.movementX * mouseSens;
@@ -570,7 +600,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            // Menüdeyken bile 3D sahne arkada aksın, görüntü gitmesin diye fizik hariç render sürekli çalışır
             if (document.pointerLockElement === renderer.domElement && isGameActive) {
                 processPhysics();
                 processZombies();
