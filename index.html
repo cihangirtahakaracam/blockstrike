@@ -2,16 +2,16 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Block Strike: Scope & Garden V10</title>
+    <title>Block Strike: Mountain Valley V11</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: sans-serif; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: #030508; color: #fff; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #010402; color: #fff; }
         
         /* ANA MENÜ (TURUNCU NEON ŞEFFAF PANEL) */
         .menu-panel {
             position: absolute; width: 100%; height: 100%;
-            background: rgba(5, 8, 12, 0.88);
+            background: rgba(4, 10, 6, 0.9);
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20;
             border: 4px solid #ff6600; backdrop-filter: blur(4px);
         }
@@ -25,14 +25,14 @@
         
         /* ALT PANEL PENCERELERİ */
         .sub-panel {
-            position: absolute; width: 80%; height: 80%; background: rgba(9, 13, 18, 0.98);
+            position: absolute; width: 80%; height: 80%; background: rgba(5, 12, 8, 0.98);
             border: 3px solid #ff6600; padding: 40px; display: none; flex-direction: column; z-index: 25;
             box-shadow: 0 0 35px rgba(255,102,0,0.4); top: 10%; left: 10%;
         }
-        .panel-header { font-size: 32px; color: #ff6600; margin-bottom: 20px; border-bottom: 2px solid #2c3540; padding-bottom: 10px; text-shadow: 0 0 10px #ff6600; }
+        .panel-header { font-size: 32px; color: #ff6600; margin-bottom: 20px; border-bottom: 2px solid #1b4332; padding-bottom: 10px; text-shadow: 0 0 10px #ff6600; }
         .close-btn { position: absolute; top: 20px; right: 20px; background: #ff6600; border: none; color: black; padding: 5px 15px; cursor: pointer; font-weight: bold; }
         .row { display: flex; margin-bottom: 18px; align-items: center; gap: 20px; font-size: 18px; }
-        input[type="range"], select { padding: 8px; background: #141922; border: 1px solid #ff6600; color: white; border-radius: 4px; }
+        input[type="range"], select { padding: 8px; background: #0b1a10; border: 1px solid #ff6600; color: white; border-radius: 4px; }
 
         /* OYUN ALANI VE HUD */
         #game-interface { width: 100%; height: 100%; position: relative; display: block; }
@@ -40,8 +40,8 @@
         
         #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #ff6600; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
         #hud { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 15px; font-size: 22px; font-weight: bold; z-index: 10; }
-        .hud-card { background: rgba(10, 18, 26, 0.95); padding: 12px 20px; border-left: 5px solid #ff6600; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
-        #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(10, 18, 26, 0.9); border: 3px solid #ff6600; border-radius: 8px; z-index: 10; }
+        .hud-card { background: rgba(5, 15, 10, 0.95); padding: 12px 20px; border-left: 5px solid #ff6600; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+        #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(5, 12, 8, 0.9); border: 3px solid #ff6600; border-radius: 8px; z-index: 10; }
         #feed { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 26px; color: #ff6600; font-weight: bold; text-shadow: 0 0 10px #000; z-index: 10; text-align: center; }
         #wave-banner { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ffbb00; font-weight: bold; text-shadow: 0 0 20px #000; z-index: 10; text-align: center; }
         #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #ff6600; z-index: 10; }
@@ -52,13 +52,13 @@
     <!-- ================= ANA MENÜ ================= -->
     <div id="main-menu" class="menu-panel">
         <h1>BLOCK STRIKE</h1>
-        <button class="btn" onclick="startGame()">SAVAŞI BAŞLAT (ENDLESS MODE)</button>
+        <button class="btn" onclick="startGame()">SAVAŞI BAŞLAT (VALLEY MODE)</button>
         <button class="btn" onclick="openPanel('arsenal-panel')">Silah Kuşanma & Skin Atölyesi</button>
-        <button class="btn" onclick="openPanel('shop-panel')">Mağaza / Galeri</button>
+        <button class="btn" onclick="openPanel('shop-panel')">Mağaza / Bilgi</button>
         <button class="btn" onclick="openPanel('settings-panel')">Ayarlar (Hassasiyet)</button>
     </div>
 
-    <!-- SİLAH KUŞANMA VE DOSYADAN FOTOĞRAF SKİN ATÖLYESİ -->
+    <!-- SİLAH VE DOSYADAN FOTOĞRAF SKİN PANELİ -->
     <div id="arsenal-panel" class="sub-panel">
         <button class="close-btn" onclick="closePanels()">X</button>
         <div class="panel-header">Gelişmiş Arsenal Atölyesi</div>
@@ -72,7 +72,6 @@
                 <option value="4">Pompalı (Dürbünlü)</option>
             </select>
         </div>
-        
         <div class="row" style="margin-top: 30px; flex-direction: column; align-items: flex-start;">
             <label style="color: #ff6600; font-weight: bold;">Bilgisayardan Fotoğraf Seç ve Silaha Giydir:</label>
             <button class="btn" style="width: 350px; border-color: #00f3ff;" onclick="document.getElementById('photo-skin-loader').click()">
@@ -84,8 +83,8 @@
 
     <div id="shop-panel" class="sub-panel">
         <button class="close-btn" onclick="closePanels()">X</button>
-        <div class="panel-header">Neon Mağaza Sistemi</div>
-        <div class="row">Haritada yeşil bahçe alanları ve siber çiçekler doğdu! Can iksirlerini yerden toplayarak hayatta kal.</div>
+        <div class="panel-header">Siber Vadi Kuralları</div>
+        <div class="row">Harita tamamen yeşillendirildi ve tırmanılabilir küçük dağlar eklendi! Tepelere çıkıp üstünlük kurun.</div>
     </div>
 
     <div id="settings-panel" class="sub-panel">
@@ -114,8 +113,8 @@
 
         <div id="controls-desc">
             <b>[W, A, S, D]</b> Savaşçı Hareketi | <b>[SPACE]</b> Zıplama | <b>[LEFT SHIFT]</b> Eğilme<br>
-            <b>[SAĞ TIK] Dürbünü Aç (Kocaman Olur & Zoom Yapar)</b> | <b>[SOL TIK]</b> Ateş Et / Sapla<br>
-            Duvara çarpıp W ile TEPESİNE TIRMANMA VE ÜSTÜNDE YÜRÜME
+            <b>[SAĞ TIK] Dürbünü Aç (Hizalı & Büyük)</b> | <b>[SOL TIK]</b> Ateş Et<br>
+            Duvarlara veya <b>KÜÇÜK DAĞLARA</b> çarpıp W ile tepelerine tırmanabilirsiniz!
         </div>
     </div>
 
@@ -137,9 +136,8 @@
         let isWaveTransition = false, isGameActive = false;
         let loadedCustomTexture = null; 
         let ignoreFirstMouseInput = false; 
-        let isAiming = false; // Dürbün açma kontrol değişkeni
+        let isAiming = false; 
 
-        // Tarayıcı sağ tık menüsünü tamamen iptal etme (Dürbün açılması için zorunlu)
         window.addEventListener('contextmenu', e => e.preventDefault());
 
         function openPanel(id) { closePanels(); document.getElementById(id).style.display = 'flex'; }
@@ -182,7 +180,7 @@
                 document.getElementById('main-menu').style.display = 'flex';
                 isGameActive = false;
                 isAiming = false;
-                camera.fov = 75; camera.updateProjectionMatrix(); // Dürbünü sıfırla
+                camera.fov = 75; camera.updateProjectionMatrix(); 
             } else {
                 document.getElementById('main-menu').style.display = 'none';
                 isGameActive = true;
@@ -194,8 +192,8 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x020406);
-            scene.fog = new THREE.FogExp2(0x020406, 0.02);
+            scene.background = new THREE.Color(0x040c06); // Yeşilimsi koyu atmosfer fog rengi
+            scene.fog = new THREE.FogExp2(0x040c06, 0.02);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -204,7 +202,7 @@
             renderer.domElement.classList.add("game-canvas");
             document.getElementById('game-interface').appendChild(renderer.domElement);
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
             let light = new THREE.DirectionalLight(0xff6600, 0.8); 
             light.position.set(40, 60, 20);
             scene.add(light);
@@ -218,38 +216,45 @@
             currentWeaponMesh.position.set(0.25, -0.25, -0.5);
             camera.add(currentWeaponMesh);
 
-            let floorGrid = new THREE.GridHelper(400, 80, 0xff6600, 0x111622);
+            // 🟢 İSTEDİĞİN YEŞİL NEON IZGARA TASARIMI
+            let floorGrid = new THREE.GridHelper(400, 80, 0x00ff66, 0x112215);
             floorGrid.position.y = 0.01;
             scene.add(floorGrid);
 
-            let floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x090d12, roughness: 0.95 }));
+            // 🟢 HER YER YEŞİL OLSUN: Ana zemin siber yeşil yapıldı
+            let floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x112a14, roughness: 0.9 }));
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // ================= HARİTA GENİŞLETME & SAKLANMA DUVARLARI (BOŞLUKLAR DOLDURULDU) =================
-            createCyberWall(0, 0, -15, 14, 5, 4, 0x161c2e);  
-            createCyberWall(-20, 0, -5, 6, 7, 6, 0x111625); 
-            createCyberWall(20, 0, -5, 6, 7, 6, 0x111625);  
-            createCyberWall(-12, 0, -35, 16, 9, 4, 0x161c2e); 
-            createCyberWall(12, 0, -35, 16, 9, 4, 0x161c2e);  
+            // TURUNCU NEON SİPERLER
+            createCyberWall(0, 0, -15, 14, 5, 4, 0x162e1c);  
+            createCyberWall(-20, 0, -5, 6, 7, 6, 0x0f2214); 
+            createCyberWall(20, 0, -5, 6, 7, 6, 0x0f2214);  
+            createCyberWall(-12, 0, -35, 16, 9, 4, 0x162e1c); 
+            createCyberWall(12, 0, -35, 16, 9, 4, 0x162e1c);  
+
+            // Harita Boş Yerlerine Siperler
+            createCyberWall(-35, 0, -15, 10, 6, 6, 0x112517);
+            createCyberWall(35, 0, -15, 10, 6, 6, 0x112517);
+            createCyberWall(0, 0, 25, 12, 5, 4, 0x162e1c);
+
+            // 🏔️ İSTEDİĞİN KÜÇÜK DAĞLAR (Tepesi parlayan, tırmanılabilir korumalı siber koniler)
+            createSmallMountain(-40, -45, 9, 14); // Sol arka dev dağ
+            createSmallMountain(40, -45, 10, 16); // Sağ arka dağ
+            createSmallMountain(-45, 25, 7, 10);  // Sol ön küçük dağ
+            createSmallMountain(45, 25, 8, 12);  // Sağ ön dağ
+            createSmallMountain(0, -50, 6, 9);    // Tam merkez arka tepe
             
-            // Boş yerlere eklenen yeni taktiksel siper duvarları:
-            createCyberWall(-35, 0, -15, 10, 6, 6, 0x1a233a);
-            createCyberWall(35, 0, -15, 10, 6, 6, 0x1a233a);
-            createCyberWall(0, 0, 25, 12, 5, 4, 0x161c2e);
-            createCyberWall(-25, 0, 20, 8, 6, 4, 0x111625);
-            createCyberWall(25, 0, 20, 8, 6, 4, 0x111625);
-
             // Harita Dış Çeper Sınır Duvarları
-            createCyberWall(0, 0, -60, 140, 25, 2, 0x070a12);
-            createCyberWall(-60, 0, 0, 2, 25, 140, 0x070a12);
-            createCyberWall(60, 0, 0, 2, 25, 140, 0x070a12);
-            createCyberWall(0, 0, 60, 140, 25, 2, 0x070a12);
+            createCyberWall(0, 0, -60, 140, 25, 2, 0x050f08);
+            createCyberWall(-60, 0, 0, 2, 25, 140, 0x050f08);
+            createCyberWall(60, 0, 0, 2, 25, 140, 0x050f08);
+            createCyberWall(0, 0, 60, 140, 25, 2, 0x050f08);
 
-            // ================= İSTEDİĞİN YEŞİL ALANLAR VE ÇİÇEKLER (GREEN ZONES) =================
-            createGreenZone(-25, -28, 25, 20); // Sol arka yeşil alan
-            createGreenZone(25, -28, 25, 20);  // Sağ arka yeşil alan
-            createGreenZone(0, 40, 40, 15);    // Ön büyük bahçe alanı
+            // Yeşil Bahçeler
+            createGreenZone(-25, -28, 25, 20); 
+            createGreenZone(25, -28, 25, 20);  
+            createGreenZone(0, 40, 40, 15);    
 
             spawnStaticPotion(0, -5);
             spawnStaticPotion(-20, -15);
@@ -270,6 +275,69 @@
             animate();
         }
 
+        // 🏔️ KÜÇÜK DAĞ ÜRETİM VE ÇARPIŞMA/TIRMANMA MOTORU
+        function createSmallMountain(x, z, radius, height) {
+            let group = new THREE.Group();
+            
+            // Dağ Ana Gövdesi (Koyu Yeşil Fütüristik Koni)
+            let mountainGeo = new THREE.ConeGeometry(radius, height, 5); // 5 köşeli low-poly tarz
+            let mountainMat = new THREE.MeshStandardMaterial({ color: 0x0c2411, roughness: 0.85 });
+            let mountainMesh = new THREE.Mesh(mountainGeo, mountainMat);
+            mountainMesh.position.y = height / 2;
+            group.add(mountainMesh);
+
+            // Dağın Zirvesi (Parlayan Turuncu Neon Tepe)
+            let peakGeo = new THREE.ConeGeometry(radius * 0.25, height * 0.25, 5);
+            let peakMat = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+            let peakMesh = new THREE.Mesh(peakGeo, peakMat);
+            peakMesh.position.y = height - (height * 0.12);
+            group.add(peakMesh);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+
+            // Dağın kapladığı alanı yuvarlak matrisle siper listesine ekle (Çarpışma & Tırmanma aktif olur)
+            coverWalls.push({ 
+                minX: x - radius * 0.75, 
+                maxX: x + radius * 0.75, 
+                minZ: z - radius * 0.75, 
+                maxZ: z + radius * 0.75, 
+                height: height 
+            });
+        }
+
+        function createGreenZone(x, z, w, d) {
+            let zoneGeo = new THREE.PlaneGeometry(w, d);
+            let zoneMat = new THREE.MeshStandardMaterial({ color: 0x1e4620, roughness: 0.9 }); 
+            let zoneMesh = new THREE.Mesh(zoneGeo, zoneMat);
+            zoneMesh.rotation.x = -Math.PI / 2;
+            zoneMesh.position.set(x, 0.02, z); 
+            scene.add(zoneMesh);
+
+            let flowerCount = Math.floor((w * d) / 15);
+            for(let i=0; i<flowerCount; i++) {
+                let fx = x + (Math.random() - 0.5) * (w - 2);
+                let fz = z + (Math.random() - 0.5) * (d - 2);
+                spawnCyberFlower(fx, fz);
+            }
+        }
+
+        function spawnCyberFlower(x, z) {
+            let flowerGroup = new THREE.Group();
+            let stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3), new THREE.MeshBasicMaterial({ color: 0x40916c }));
+            stem.position.y = 0.15;
+            flowerGroup.add(stem);
+
+            let colors = [0xff0055, 0xffbb00, 0x00f3ff, 0xff00ff];
+            let randomColor = colors[Math.floor(Math.random() * colors.length)];
+            let petal = new THREE.Mesh(new THREE.SphereGeometry(0.07, 5, 5), new THREE.MeshBasicMaterial({ color: randomColor }));
+            petal.position.y = 0.3;
+            flowerGroup.add(petal);
+
+            flowerGroup.position.set(x, 0, z);
+            scene.add(flowerGroup);
+        }
+
         function createCyberWall(x, y, z, w, h, d, color) {
             let group = new THREE.Group();
             let mainMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: color, roughness: 0.5 }));
@@ -283,44 +351,6 @@
             group.position.set(x, y, z);
             scene.add(group);
             coverWalls.push({ minX: x - w/2, maxX: x + w/2, minZ: z - d/2, maxZ: z + d/2, height: h });
-        }
-
-        // Yeşil Bahçe Alanı Üretim Fonksiyonu
-        function createGreenZone(x, z, w, d) {
-            let zoneGeo = new THREE.PlaneGeometry(w, d);
-            let zoneMat = new THREE.MeshStandardMaterial({ color: 0x1b4332, roughness: 0.9 }); // Koyu siber yeşil çim rengi
-            let zoneMesh = new THREE.Mesh(zoneGeo, zoneMat);
-            zoneMesh.rotation.x = -Math.PI / 2;
-            zoneMesh.position.set(x, 0.02, z); // Z-fighting engellemek için hafif yukarıda
-            scene.add(zoneMesh);
-
-            // Bahçenin içine rastgele renkli 3D siber çiçekler yerleştirme
-            let flowerCount = Math.floor((w * d) / 15);
-            for(let i=0; i<flowerCount; i++) {
-                let fx = x + (Math.random() - 0.5) * (w - 2);
-                let fz = z + (Math.random() - 0.5) * (d - 2);
-                spawnCyberFlower(fx, fz);
-            }
-        }
-
-        // Renkli 3D Çiçek Üretici
-        function spawnCyberFlower(x, z) {
-            let flowerGroup = new THREE.Group();
-            
-            // Çiçek Sapı (İnce yeşil silindir)
-            let stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3), new THREE.MeshBasicMaterial({ color: 0x40916c }));
-            stem.position.y = 0.15;
-            flowerGroup.add(stem);
-
-            // Çiçek Yaprağı / Tomurcuğu (Neon Renkli Parlayan Küreler)
-            let colors = [0xff0055, 0xffbb00, 0x00f3ff, 0xff00ff];
-            let randomColor = colors[Math.floor(Math.random() * colors.length)];
-            let petal = new THREE.Mesh(new THREE.SphereGeometry(0.07, 5, 5), new THREE.MeshBasicMaterial({ color: randomColor }));
-            petal.position.y = 0.3;
-            flowerGroup.add(petal);
-
-            flowerGroup.position.set(x, 0, z);
-            scene.add(flowerGroup);
         }
 
         function spawnStaticPotion(x, z) {
@@ -397,10 +427,9 @@
                 barrel.rotation.x = Math.PI / 2; barrel.position.z = -(length/2 + 0.15);
                 currentWeaponMesh.add(barrel);
 
-                // Dürbün Yapısı (Scope)
                 let scopeLength = wep.name === 'Sniper' ? 0.22 : 0.12;
                 let scope = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, scopeLength), new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.2 }));
-                scope.name = "scope_mesh"; // Ayrı büyütmek için isim verdik
+                scope.name = "scope_mesh"; 
                 scope.rotation.x = Math.PI / 2;
                 scope.position.set(0, 0.065, -0.02); 
                 currentWeaponMesh.add(scope);
@@ -517,33 +546,29 @@
             setTimeout(() => { scene.remove(laserMesh); }, 150);
         }
 
-        // MOUSE VE SAĞ TIK DÜRBÜN MEKANİĞİ SCRIPT
         function onMouseClick(e) {
             if (document.pointerLockElement !== renderer.domElement || !isGameActive) return;
 
-            // ================= 🎯 SAĞ TIK DURBÜN AÇMA MOTORU (ADS) =================
+            // ================= 🎯 SAĞ TIK DÜRBÜN (ADS) HİZALAMA GÜNCELLEMESİ =================
             if (e.button === 2) { 
-                if (playerStats.weaponIndex === 0) return; // Bıçakta dürbün açılmasın
+                if (playerStats.weaponIndex === 0) return; 
                 
-                isAiming = !isAiming; // Durumu tersine çevir
+                isAiming = !isAiming; 
                 
                 if (isAiming) {
-                    // Dürbün açılınca Ekran Zum Yapar (Sniper daha çok yakınlaştırır)
                     camera.fov = playerStats.weaponIndex === 3 ? 14 : 32; 
-                    showFeed("DÜŞMAN KİLİTLENDİ: DÜRBÜN AÇIK");
+                    showFeed("DÜRBÜN NİŞANGAHI AKTİF");
                 } else {
-                    camera.fov = 75; // Normal bakış açısı
-                    showFeed("DÜRBÜN KAPATILDI");
+                    camera.fov = 75; 
+                    showFeed("NORMAL BAKIŞ");
                 }
-                camera.updateProjectionMatrix(); // Zum miktarını ekrana yansıt
+                camera.updateProjectionMatrix(); 
                 return;
             }
 
-            // Sol Tık Ateş Etme
             if (e.button === 0) {
                 if (isWaveTransition) return;
                 
-                // Silah Geri Tepme Efekti
                 currentWeaponMesh.position.z = isAiming ? -0.22 : -0.35;
                 setTimeout(() => currentWeaponMesh.position.z = isAiming ? -0.25 : -0.5, 70);
 
@@ -605,7 +630,7 @@
             coverWalls.forEach(w => {
                 let bx = cx + ( (w.maxX + w.minX)/2 - player.position.x ) * 3.5;
                 let bz = cz + ( (w.maxZ + w.minZ)/2 - player.position.z ) * 3.5;
-                minimapCtx.fillStyle = "rgba(255, 102, 0, 0.2)"; minimapCtx.fillRect(bx - 12, bz - 12, 24, 24);
+                minimapCtx.fillStyle = "rgba(0, 255, 100, 0.15)"; minimapCtx.fillRect(bx - 12, bz - 12, 24, 24);
             });
             potions.forEach(pot => {
                 let px = cx + (pot.position.x - player.position.x) * 3.5;
@@ -665,7 +690,7 @@
         }
 
         function swapWeapon(index) {
-            isAiming = false; camera.fov = 75; camera.updateProjectionMatrix(); // Silah değişince dürbünü kapa
+            isAiming = false; camera.fov = 75; camera.updateProjectionMatrix(); 
             playerStats.weaponIndex = index; playerStats.currentWeapon = weaponsData[index].name;
             document.getElementById('weapon-val').innerText = playerStats.currentWeapon;
             showFeed(playerStats.currentWeapon.toUpperCase() + " KUŞANILDI"); buildWeaponVisual();
@@ -677,7 +702,6 @@
             if (ignoreFirstMouseInput) { ignoreFirstMouseInput = false; return; }
             if (Math.abs(e.movementX) > 100 || Math.abs(e.movementY) > 100) return;
             
-            // Dürbün açıkken nişan almayı kolaylaştırmak için fare hassasiyetini hafifçe düşürür
             let dynamicSens = isAiming ? mouseSens * 0.4 : mouseSens;
 
             player.rotation.y -= e.movementX * dynamicSens;
@@ -697,17 +721,16 @@
                 processZombies();
                 processParticles();
 
-                // ================= 🎯 SİLAHI GÖZ HİZASINA GETİRME (KOCAMAN DÜRBÜN ETKİSİ) =================
-                let targetWeaponPos = new THREE.Vector3(0.25, -0.25, -0.5); // Normal bel hizası konumu
+                // ================= 🎯 HİZALANMIŞ MÜKEMMEL DÜRBÜN KONUMU SCRIPT =================
+                let targetWeaponPos = new THREE.Vector3(0.25, -0.25, -0.5); 
                 let targetWeaponScale = new THREE.Vector3(1, 1, 1);
 
                 if (isAiming && playerStats.weaponIndex !== 0) { 
-                    // Dürbün açılınca silahı tam merkeze (göz hizasına) kaydır ve dürbün merceğini dev gibi büyüt!
-                    targetWeaponPos.set(0, -0.09, -0.22); 
-                    targetWeaponScale.set(2.2, 2.2, 1.2); // Enine ve boyuna büyütme (Dürbün dev gibi kalır)
+                    // 🛠️ DÜRBÜN FIX: Silahın y eksenini -0.15'e indirerek, üstteki dürbünü kamerayla tam hizalıyoruz! (İçini göstermez)
+                    targetWeaponPos.set(0, -0.15, -0.25); 
+                    targetWeaponScale.set(2.4, 2.4, 1.2); 
                 }
                 
-                // Yumuşak geçiş (Lerp) animasyonu
                 currentWeaponMesh.position.lerp(targetWeaponPos, 0.25);
                 currentWeaponMesh.scale.lerp(targetWeaponScale, 0.25);
             }
