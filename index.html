@@ -2,24 +2,24 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Block Strike: GitHub Endless Edition</title>
+    <title>Block Strike: Cyber Realism V4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: sans-serif; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: #05080c; color: #fff; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #030508; color: #fff; }
         #blocker {
-            position: absolute; width: 100%; height: 100%; background: rgba(10, 15, 23, 0.95);
+            position: absolute; width: 100%; height: 100%; background: rgba(5, 8, 12, 0.96);
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20;
-            cursor: pointer; border: 4px solid #00f3ff;
+            cursor: pointer; border: 4px solid #ff4655;
         }
-        #blocker h1 { font-size: 65px; color: #00f3ff; margin-bottom: 20px; letter-spacing: 6px; text-shadow: 0 0 25px #00f3ff; }
-        #blocker p { font-size: 22px; color: #fff; background: #ff4655; padding: 15px 35px; font-weight: bold; text-transform: uppercase; border-radius: 4px; box-shadow: 0 0 15px #ff4655; }
+        #blocker h1 { font-size: 65px; color: #ff4655; margin-bottom: 20px; letter-spacing: 6px; text-shadow: 0 0 25px #ff4655; }
+        #blocker p { font-size: 22px; color: #fff; background: #00f3ff; color: #000; padding: 15px 35px; font-weight: bold; text-transform: uppercase; border-radius: 4px; box-shadow: 0 0 25px #00f3ff; }
         #blocker .info { margin-top: 25px; color: #888; text-align: center; font-size: 14px; line-height: 1.6; }
         #game-interface { width: 100%; height: 100%; position: relative; display: block; }
         #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #00f3ff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
         #hud { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 15px; font-size: 22px; font-weight: bold; z-index: 10; }
-        .hud-card { background: rgba(10, 18, 26, 0.9); padding: 12px 20px; border-left: 5px solid #00f3ff; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
-        #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(10, 18, 26, 0.9); border: 3px solid #ff4655; border-radius: 8px; z-index: 10; }
+        .hud-card { background: rgba(10, 18, 26, 0.95); padding: 12px 20px; border-left: 5px solid #ff4655; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+        #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(10, 18, 26, 0.9); border: 3px solid #00f3ff; border-radius: 8px; z-index: 10; }
         #feed { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 26px; color: #00f3ff; font-weight: bold; text-shadow: 0 0 10px #000; z-index: 10; text-align: center; }
         #wave-banner { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ff4655; font-weight: bold; text-shadow: 0 0 20px #000; z-index: 10; text-align: center; }
         #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #333; }
@@ -28,11 +28,12 @@
 <body>
 
     <div id="blocker">
-        <h1>BLOCK STRIKE</h1>
-        <p>SAVAŞA BAŞLAMAK İÇİN TIKLA</p>
+        <h1>BLOCK STRIKE V4</h1>
+        <p>SAVAŞI BAŞLAT</p>
         <div class="info">
-            <b>GitHub Ömür Boyu Sürüm:</b> Duvarların içinden geçme hatası tamamen engellendi!<br>
-            Silahlar: 1 (Bıçak), 2 (Tabanca), 3 (Tüfek), 4 (Sniper), 5 (Pompalı)
+            <b>Cyber Graphics & Realistic Climb Update:</b><br>
+            Duvarların üstüne tırmanabilir ve üzerlerinde yürüyebilirsiniz!<br>
+            Botlara parlayan siber gözler, zırhlar ve taktiksel detaylar eklendi.
         </div>
     </div>
 
@@ -46,20 +47,20 @@
             <div class="hud-card" style="color: #ff4655;">CAN: <span id="hp-val">100</span></div>
             <div class="hud-card" style="color: #00f3ff;">SİLAH: <span id="weapon-val">Tabanca</span></div>
             <div class="hud-card" style="color: #ffb700;">SKOR: <span id="score-val">0</span></div>
-            <div class="hud-card" style="color: #ffffff; background: #ff4655;">DALGA: <span id="wave-val">1</span></div>
+            <div class="hud-card" style="color: #ffffff; background: #ff4655; border-left:none;">DALGA: <span id="wave-val">1</span></div>
         </div>
 
         <div id="controls-desc">
-            <b>[W, A, S, D]</b> Hareket | <b>[SPACE]</b> Dengeli Zıplama<br>
-            <b>[LEFT SHIFT]</b> Eğilme | Duvara sürterek <b>W</b> ile <b>TIRMANMA</b><br>
-            <b>[SOL TIK]</b> Ateş Et / Yakından Bıçak Sapla
+            <b>[W, A, S, D]</b> Savaşçı Hareketi | <b>[SPACE]</b> Zıplama<br>
+            <b>[LEFT SHIFT]</b> Eğilme | Duvara çarpıp <b>W</b> ile <b>TEPESİNE TIRMANMA</b><br>
+            Silahlar: 1 (Bıçak) | 2 (Tabanca) | 3 (Tüfek) | 4 (Sniper) | 5 (Pompalı)
         </div>
     </div>
 
     <script>
         let playerStats = { hp: 100, score: 0, currentWeapon: 'Tabanca', weaponIndex: 1, wave: 1 };
         let weaponsData = [
-            { name: 'Bıçak', range: 3, damage: 65, color: 0xcccccc, type: 'melee' },
+            { name: 'Bıçak', range: 3.5, damage: 65, color: 0xcccccc, type: 'melee' },
             { name: 'Tabanca', range: 40, damage: 35, color: 0x222222, type: 'range' },
             { name: 'Otomatik Tüfek', range: 60, damage: 45, color: 0x1e3f20, type: 'range' },
             { name: 'Sniper', range: 120, damage: 100, color: 0x5c1e1e, type: 'range' },
@@ -75,7 +76,6 @@
         let isWaveTransition = false;
 
         const blocker = document.getElementById('blocker');
-
         blocker.addEventListener('click', () => { renderer.domElement.requestPointerLock(); });
 
         document.addEventListener('pointerlockchange', () => {
@@ -87,21 +87,21 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x04060a);
-            scene.fog = new THREE.FogExp2(0x04060a, 0.025);
+            scene.background = new THREE.Color(0x020406);
+            scene.fog = new THREE.FogExp2(0x020406, 0.02);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('game-interface').appendChild(renderer.domElement);
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-            let light = new THREE.DirectionalLight(0x00f3ff, 0.7);
-            light.position.set(30, 50, 20);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            let light = new THREE.DirectionalLight(0x00f3ff, 0.8);
+            light.position.set(40, 60, 20);
             scene.add(light);
 
             player = new THREE.Object3D();
-            player.position.set(0, 1.6, 5);
+            player.position.set(0, 1.6, 8);
             scene.add(player);
             player.add(camera);
 
@@ -109,26 +109,31 @@
             currentWeaponMesh.position.set(0.25, -0.25, -0.5);
             camera.add(currentWeaponMesh);
 
-            let floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x0f1318, roughness: 0.9 }));
+            // Siber Teknolojik Kareli Zemin Tasarımı
+            let floorGrid = new THREE.GridHelper(400, 80, 0x00f3ff, 0x111622);
+            floorGrid.position.y = 0.01;
+            scene.add(floorGrid);
+
+            let floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x090d12, roughness: 0.95 }));
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // SAKLANMA SIPERLERI
-            createCoverWall(0, 0, -15, 12, 6, 4, 0x2c3540);  
-            createCoverWall(-18, 0, -5, 6, 8, 6, 0x1e232a); 
-            createCoverWall(18, 0, -5, 6, 8, 6, 0x1e232a);  
-            createCoverWall(-12, 0, -30, 14, 10, 4, 0x15191e); 
-            createCoverWall(12, 0, -30, 14, 10, 4, 0x15191e);  
+            // 🏙️ MODERN SİPER DUVARLARI (Gelişmiş Görsel Şeritli)
+            createCyberWall(0, 0, -15, 14, 5, 4, 0x1a233a);  
+            createCyberWall(-20, 0, -5, 6, 7, 6, 0x111625); 
+            createCyberWall(20, 0, -5, 6, 7, 6, 0x111625);  
+            createCyberWall(-12, 0, -35, 16, 9, 4, 0x161c2e); 
+            createCyberWall(12, 0, -35, 16, 9, 4, 0x161c2e);  
             
-            // Sınır Duvarları
-            createCoverWall(0, 0, -60, 140, 20, 2, 0x0a0c10);
-            createCoverWall(-60, 0, 0, 2, 20, 140, 0x0a0c10);
-            createCoverWall(60, 0, 0, 2, 20, 140, 0x0a0c10);
-            createCoverWall(0, 0, 60, 140, 20, 2, 0x0a0c10);
+            // Harita Koruma Sınırları
+            createCyberWall(0, 0, -60, 140, 25, 2, 0x070a12);
+            createCyberWall(-60, 0, 0, 2, 25, 140, 0x070a12);
+            createCyberWall(60, 0, 0, 2, 25, 140, 0x070a12);
+            createCyberWall(0, 0, 60, 140, 25, 2, 0x070a12);
 
             spawnStaticPotion(0, -5);
-            spawnStaticPotion(-18, -15);
-            spawnStaticPotion(18, -15);
+            spawnStaticPotion(-20, -15);
+            spawnStaticPotion(20, -15);
 
             startZombieWave();
             buildWeaponVisual();
@@ -145,12 +150,27 @@
             animate();
         }
 
-        function createCoverWall(x, y, z, w, h, d, color) {
-            let geo = new THREE.BoxGeometry(w, h, d);
-            let mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.7 });
-            let mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, y + h/2, z);
-            scene.add(mesh);
+        // Siber Çizgili Duvar Üretim Odası
+        function createCyberWall(x, y, z, w, h, d, color) {
+            let group = new THREE.Group();
+            
+            let mainMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, d),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.5, metalness: 0.3 })
+            );
+            mainMesh.position.y = h/2;
+            group.add(mainMesh);
+
+            // Duvarların üst kenarlarına neon siber şerit çizgisi ekleme (Grafik Güncellemesi)
+            let neonGeo = new THREE.BoxGeometry(w + 0.05, 0.15, d + 0.05);
+            let neonMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
+            let neonLine = new THREE.Mesh(neonGeo, neonMat);
+            neonLine.position.y = h;
+            group.add(neonLine);
+
+            group.position.set(x, y, z);
+            scene.add(group);
+
             coverWalls.push({ minX: x - w/2, maxX: x + w/2, minZ: z - d/2, maxZ: z + d/2, height: h });
         }
 
@@ -160,6 +180,7 @@
             group.add(bottle); group.position.set(x, 0.3, z); scene.add(group); potions.push(group);
         }
 
+        // 🤖 ULTRA DETAYLI PARÇALI BOT (ZOMBİ) DOĞURMA SİSTEMİ
         function startZombieWave() {
             isWaveTransition = false;
             document.getElementById('wave-banner').innerText = "";
@@ -174,15 +195,42 @@
                 let rx = (Math.random() - 0.5) * 80; let rz = -20 - Math.random() * 30;
                 if (checkWallCollision(rx, rz)) { rx += 5; rz -= 5; }
 
+                // BOT DETAYLANDIRMA (Composite Tasarım)
                 let zombieGroup = new THREE.Group();
-                let body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.7, 0.5), new THREE.MeshStandardMaterial({ color: 0x4a5759 }));
-                body.position.y = 0.85; zombieGroup.add(body);
-                let head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), new THREE.MeshStandardMaterial({ color: 0x232c2d }));
-                head.position.y = 1.8; zombieGroup.add(head);
-                let gun = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.85), new THREE.MeshStandardMaterial({ color: 0x000000 }));
-                gun.position.set(0.35, 1.1, -0.4); zombieGroup.add(gun);
+                
+                // Gövde & Siber Göğüs Zırhı
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.3, 0.5), new THREE.MeshStandardMaterial({ color: 0x2f3e46, roughness: 0.4 }));
+                body.position.y = 1.05;
+                zombieGroup.add(body);
 
-                zombieGroup.position.set(rx, 0, rz); scene.add(zombieGroup);
+                let armor = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.5, 0.55), new THREE.MeshStandardMaterial({ color: 0xff4655, metalness: 0.6 }));
+                armor.position.set(0, 1.25, 0);
+                zombieGroup.add(armor);
+
+                // Robotik Bacaklar
+                let legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.5, 0.18), new THREE.MeshStandardMaterial({ color: 0x141f22 }));
+                legL.position.set(-0.2, 0.25, 0);
+                let legR = legL.clone(); legR.position.x = 0.2;
+                zombieGroup.add(legL, legR);
+
+                // Taktiksel Kasklı Kafa
+                let head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), new THREE.MeshStandardMaterial({ color: 0x141f22 }));
+                head.position.y = 1.85;
+                zombieGroup.add(head);
+
+                // PARLAYAN SİBER KIRMIZI GÖZLER (Aşırı iyi duruyor)
+                let eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+                eyeL.position.set(-0.08, 1.9, -0.2);
+                let eyeR = eyeL.clone(); eyeR.position.x = 0.08;
+                zombieGroup.add(eyeL, eyeR);
+
+                // Taktiksel Lazerli Ağır Silah
+                let gun = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.9), new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.8 }));
+                gun.position.set(0.38, 1.2, -0.4);
+                zombieGroup.add(gun);
+
+                zombieGroup.position.set(rx, 0, rz);
+                scene.add(zombieGroup);
 
                 bots.push({ mesh: zombieGroup, hp: hpMultiplier, angle: Math.random() * Math.PI * 2, speed: Math.min(0.09, speedMultiplier), damage: damageMultiplier, lastAttack: 0 });
             }
@@ -213,6 +261,7 @@
             }
         }
 
+        // 🧗‍♂️ YENİ NESİL GERÇEKÇİ TIRMANMA VE DUVAR ÜSTÜNE BASMA MOTORU
         function processPhysics() {
             let speed = isCrouch ? 0.04 : 0.09;
             let fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
@@ -224,30 +273,57 @@
             if (moveL) moveVector.addScaledVector(side, speed);
             if (moveR) moveVector.addScaledVector(side, -speed);
 
-            player.position.x += moveVector.x; player.position.z += moveVector.z;
+            player.position.x += moveVector.x;
+            player.position.z += moveVector.z;
 
             let pRadius = 0.55; 
-            coverWalls.forEach(w => {
-                if (player.position.x > w.minX - pRadius && player.position.x < w.maxX + pRadius &&
-                    player.position.z > w.minZ - pRadius && player.position.z < w.maxZ + pRadius) {
-                    let overlapX1 = player.position.x - (w.minX - pRadius);
-                    let overlapX2 = (w.maxX + pRadius) - player.position.x;
-                    let overlapZ1 = player.position.z - (w.minZ - pRadius);
-                    let overlapZ2 = (w.maxZ + pRadius) - player.position.z;
-                    let minOverlap = Math.min(overlapX1, overlapX2, overlapZ1, overlapZ2);
+            let feetY = player.position.y - (isCrouch ? 0.9 : 1.6); // Savaşçının ayak tabanı hizası
 
-                    if (minOverlap === overlapX1) player.position.x = w.minX - pRadius;
-                    else if (minOverlap === overlapX2) player.position.x = w.maxX + pRadius;
-                    else if (minOverlap === overlapZ1) player.position.z = w.minZ - pRadius;
-                    else if (minOverlap === overlapZ2) player.position.z = w.maxZ + pRadius;
-                    if (moveF) yVel = 0.07; 
+            let standsOnObject = false;
+
+            coverWalls.forEach(w => {
+                // Sadece dikey olarak duvarın sınırları içindeysek çarpışma ve tırmanma çalışır
+                if (feetY >= -0.1 && feetY <= w.height + 0.1) {
+                    if (player.position.x > w.minX - pRadius && player.position.x < w.maxX + pRadius &&
+                        player.position.z > w.minZ - pRadius && player.position.z < w.maxZ + pRadius) {
+                        
+                        // Eğer tam duvarın tepe sınırına yaklaştıysak üstüne çıkmamıza izin ver!
+                        if (feetY >= w.height - 0.4) {
+                            player.position.y = w.height + (isCrouch ? 0.9 : 1.6);
+                            yVel = 0;
+                            isJump = false;
+                            standsOnObject = true;
+                        } else {
+                            // Duvarın altındaysak içinden geçmeyi engelleyen itme fiziği
+                            let overlapX1 = player.position.x - (w.minX - pRadius);
+                            let overlapX2 = (w.maxX + pRadius) - player.position.x;
+                            let overlapZ1 = player.position.z - (w.minZ - pRadius);
+                            let overlapZ2 = (w.maxZ + pRadius) - player.position.z;
+                            let minOverlap = Math.min(overlapX1, overlapX2, overlapZ1, overlapZ2);
+
+                            if (minOverlap === overlapX1) player.position.x = w.minX - pRadius;
+                            else if (minOverlap === overlapX2) player.position.x = w.maxX + pRadius;
+                            else if (minOverlap === overlapZ1) player.position.z = w.minZ - pRadius;
+                            else if (minOverlap === overlapZ2) player.position.z = w.maxZ + pRadius;
+                            
+                            // GERÇEKÇİ TIRMANMA SINIRI: Sadece duvar boyu kadar tırmandırır, sonsuz boşluğa gidemezsin!
+                            if (moveF && feetY < w.height - 0.2) {
+                                yVel = 0.08;
+                            }
+                        }
+                    }
                 }
             });
 
-            yVel += -0.01; player.position.y += yVel;
-            let limitY = isCrouch ? 0.9 : 1.6;
-            if (player.position.y <= limitY) { player.position.y = limitY; yVel = 0; isJump = false; }
+            // Yerçekimi ivmesi uygulaması
+            if (!standsOnObject) {
+                yVel += -0.01; 
+                player.position.y += yVel;
+                let limitY = isCrouch ? 0.9 : 1.6;
+                if (player.position.y <= limitY) { player.position.y = limitY; yVel = 0; isJump = false; }
+            }
 
+            // Can İksirlerini Toplama
             for(let i = potions.length - 1; i >= 0; i--) {
                 if(player.position.distanceTo(potions[i].position) < 1.5) {
                     playerStats.hp = Math.min(100, playerStats.hp + 35);
@@ -276,7 +352,7 @@
                     if (now - zomb.lastAttack > 1800) {
                         playerStats.hp -= zomb.damage;
                         document.getElementById('hp-val').innerText = playerStats.hp;
-                        showFeed("ZOMBİ SANA ATEŞ ETTİ! -" + zomb.damage);
+                        showFeed("SİLAHLI BOT ATEŞ ETTİ! -" + zomb.damage);
                         zomb.lastAttack = now;
                         if(playerStats.hp <= 0) {
                             showFeed("ELENDİN! OYUN BİTTİ.");
@@ -294,19 +370,21 @@
             let activeWep = weaponsData[playerStats.weaponIndex];
             let raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+            
+            // Botların ana gövde zırhlarını vurulabilir hedef yapıyoruz
             let targets = bots.map(b => b.mesh.children[0]);
             let hits = raycaster.intersectObjects(targets);
 
             if (hits.length > 0) {
                 let hitDist = hits[0].distance;
-                if (activeWep.type === 'melee' && hitDist > activeWep.range) { showFeed("ÇOK UZAKTASIN!"); return; }
+                if (activeWep.type === 'melee' && hitDist > activeWep.range) { showFeed("MENZİL YETERSİZ!"); return; }
 
                 let targetBody = hits[0].object;
                 let activeBot = bots.find(b => b.mesh.children[0] === targetBody);
 
                 if (activeBot) {
                     activeBot.hp -= activeWep.damage;
-                    showFeed("DÜŞMAN VURULDU!");
+                    showFeed("DÜŞMAN ZIRHI VURULDU!");
                     if(activeWep.type === 'melee') activeBot.mesh.translateZ(-2.5); 
 
                     if (activeBot.hp <= 0) {
@@ -343,12 +421,12 @@
         function drawMinimap() {
             minimapCtx.clearRect(0, 0, 200, 200); let cx = 100; let cz = 100;
             minimapCtx.strokeStyle = "rgba(0, 243, 255, 0.4)"; minimapCtx.lineWidth = 2;
-            minimapCtx.getLineDash = [0]; minimapCtx.beginPath(); minimapCtx.arc(cx, cz, 98, 0, Math.PI*2); minimapCtx.stroke();
+            minimapCtx.beginPath(); minimapCtx.arc(cx, cz, 98, 0, Math.PI*2); minimapCtx.stroke();
 
             coverWalls.forEach(w => {
                 let bx = cx + ( (w.maxX + w.minX)/2 - player.position.x ) * 3.5;
                 let bz = cz + ( (w.maxZ + w.minZ)/2 - player.position.z ) * 3.5;
-                minimapCtx.fillStyle = "rgba(255, 255, 255, 0.2)"; minimapCtx.fillRect(bx - 12, bz - 12, 24, 24);
+                minimapCtx.fillStyle = "rgba(0, 243, 255, 0.15)"; minimapCtx.fillRect(bx - 12, bz - 12, 24, 24);
             });
             potions.forEach(pot => {
                 let px = cx + (pot.position.x - player.position.x) * 3.5;
