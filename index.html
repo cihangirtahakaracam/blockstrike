@@ -2,95 +2,92 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Block Strike: Multiplayer Master V15</title>
-    <!-- 3D Grafik ve Gerçek Zamanlı Online Eşleşme Kütüphaneleri -->
+    <title>Block Strike: Multiplayer & Skin Edition V15</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: sans-serif; }
         body, html { width: 100%; height: 100%; overflow: hidden; background: #010402; color: #fff; }
         
-        /* ÇALIŞAN GARANTİLİ ANA SİSTEM MENÜSÜ */
+        /* ÇALIŞAN GARANTİLİ ANA SİSTEM MENÜSÜ (TURUNCU NEON) */
         #blocker {
             position: absolute; width: 100%; height: 100%; background: rgba(4, 10, 6, 0.93);
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20;
             cursor: pointer; border: 4px solid #ff6600; backdrop-filter: blur(4px);
         }
         
-        .menu-box { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
-        #blocker h1 { font-size: 65px; color: #ff6600; margin-bottom: 15px; letter-spacing: 6px; text-shadow: 0 0 25px #ff6600; text-transform: uppercase; }
-        #blocker p.start-txt { font-size: 22px; color: #000; background: #ff6600; padding: 12px 30px; font-weight: bold; text-transform: uppercase; border-radius: 4px; box-shadow: 0 0 25px #ff6600; margin-bottom: 20px; }
+        .menu-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #blocker h1 { font-size: 65px; color: #ff6600; margin-bottom: 20px; letter-spacing: 6px; text-shadow: 0 0 25px #ff6600; text-transform: uppercase; }
+        #blocker p.start-txt { font-size: 22px; color: #000; background: #ff6600; padding: 15px 35px; font-weight: bold; text-transform: uppercase; border-radius: 4px; box-shadow: 0 0 25px #ff6600; margin-bottom: 20px; }
         
-        /* SEKMELER VE BUTONLAR */
+        /* MODERN SİBER HESAP SİSTEMİ INPUTLARI */
+        .account-box { background: rgba(15, 30, 20, 0.8); border: 1px solid #ff6600; padding: 15px; margin-bottom: 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; width: 300px; }
+        .account-box input { padding: 8px; background: #111; color: #fff; border: 1px solid #ff6600; border-radius: 4px; font-size: 14px; text-align: center; }
+
+        /* MODERN SİBER BUTONLAR */
         .m-btn {
             background: transparent; border: 2px solid #ff6600; color: #fff; padding: 10px 20px;
-            cursor: pointer; font-weight: bold; font-size: 14px; margin: 4px; text-transform: uppercase; transition: all 0.2s;
+            cursor: pointer; font-weight: bold; font-size: 15px; margin: 5px; text-transform: uppercase; transition: all 0.2s;
         }
         .m-btn:hover { background: #ff6600; color: #000; box-shadow: 0 0 15px #ff6600; }
         
-        /* HESAP KAYIT ALANI CSS */
-        .account-box { background: rgba(20,35,25,0.7); border: 1px solid #ff6600; padding: 15px; margin-bottom: 20px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; width: 320px; }
-        .account-box input { padding: 8px; background: #111; color: #fff; border: 1px solid #ff6600; border-radius: 4px; }
-
-        .sub-window { display: none; flex-direction: column; align-items: center; background: #040a06; border: 2px solid #ff6600; padding: 25px; margin-top: 15px; box-shadow: 0 0 20px rgba(255,102,0,0.3); max-width: 90%; }
+        /* GİZLİ ALT PENCERELER */
+        .sub-window { display: none; flex-direction: column; align-items: center; background: #040a06; border: 2px solid #ff6600; padding: 25px; margin-top: 15px; box-shadow: 0 0 20px rgba(255,102,0,0.3); }
         .skin-item { border: 1px dashed #ff6600; padding: 10px; margin: 10px; text-align: center; background: #09140c; width: 160px; }
 
-        /* OYUN HUD SİSTEMİ */
-        #game-interface { width: 100%; height: 100%; position: relative; display: block; }
+        /* OYUN HUD SİSTEMİ VE KANVAS GARANTİSİ */
+        #game-interface { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; display: block; }
+        canvas.game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: block; }
+        
         #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #ff6600; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 10; }
         #hud { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 15px; font-size: 22px; font-weight: bold; z-index: 10; }
         .hud-card { background: rgba(5, 15, 10, 0.95); padding: 12px 20px; border-left: 5px solid #ff6600; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
         #minimap { position: absolute; top: 20px; right: 20px; width: 200px; height: 200px; background: rgba(5, 12, 8, 0.9); border: 3px solid #ff6600; border-radius: 8px; z-index: 10; }
         #feed { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 26px; color: #ff6600; font-weight: bold; text-shadow: 0 0 10px #000; z-index: 10; text-align: center; }
         #wave-banner { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ffbb00; font-weight: bold; text-shadow: 0 0 20px #000; z-index: 10; text-align: center; }
-        #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #ff6600; }
+        #controls-desc { position: absolute; bottom: 30px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px; font-size: 13px; border-radius: 8px; text-align: right; line-height: 1.6; color: #ccc; border: 1px solid #ff6600; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <!-- ================= ANA MENÜ KATMANI ================= -->
     <div id="blocker">
         <div id="menu-main" class="menu-box">
             <h1>BLOCK STRIKE V15</h1>
             
-            <!-- 👤 HESAP KAYIT ALANI (DATA VE ALTIN KAYBOLMAZ) -->
-            <div class="account-box" id="acc-panel">
-                <h4 style="color:#ff6600; text-align:center;">Siber Hesap Sistemi</h4>
-                <input type="text" id="acc-name" placeholder="Oyuncu Adınız...">
-                <input type="text" id="acc-email" placeholder="E-posta Adresiniz...">
-                <button class="m-btn" style="padding:5px; font-size:12px;" onclick="saveAccountData(event)">Verileri Buluta Kaydet</button>
+            <div class="account-box" id="cloud-account-panel">
+                <h4 style="color:#ff6600; font-size:14px; text-align:center;">Siber Kimlik Sistemi</h4>
+                <input type="text" id="username-input" placeholder="Oyuncu Adı Girin...">
+                <input type="text" id="email-input" placeholder="E-posta Girin...">
+                <button class="m-btn" style="padding:4px; font-size:11px;" onclick="saveProfileData(event)">Profilimi Güvenceye Al</button>
             </div>
+
+            <p class="start-txt">SAVAŞI BAŞLAT (ZOMBİ MODU)</p>
             
-            <p class="start-txt">SAVAŞI BAŞLAT</p>
-            
-            <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+            <div style="display: flex; gap: 5px;">
                 <button class="m-btn" onclick="openSub('window-shop', event)">🛒 SKIN MAĞAZASI</button>
                 <button class="m-btn" onclick="openSub('window-online', event)">🌐 ONLİNE OYNA</button>
                 <button class="m-btn" onclick="openSub('window-arsenal', event)">Silah Ayarı</button>
             </div>
             
-            <!-- MAĞAZA PENCERESİ -->
             <div id="window-shop" class="sub-window">
-                <h3 style="color:#ffbb00; margin-bottom:10px;">SKIN ATÖLYESİ (Altın: <span id="shop-gold">0</span>)</h3>
-                <div style="display:flex; margin-bottom:15px;">
+                <h3 style="color:#ffbb00; margin-bottom:10px;">SKIN SEÇİMİ (Altın: <span id="shop-gold">0</span>)</h3>
+                <div style="display:flex;">
                     <div class="skin-item">
                         <p style="color:#00f3ff; font-weight:bold;">Skyemau5</p>
-                        <button class="m-btn" style="font-size:11px; padding:5px;" onclick="buySkin('Skyemau5', 100, event)" id="skin-btn-1">100 ALTIN</button>
+                        <button class="m-btn" style="font-size:12px; padding:5px; margin-top:5px;" onclick="buySkin('Skyemau5', 100, event)" id="skin-btn-1">100 ALTIN</button>
                     </div>
                     <div class="skin-item">
                         <p style="color:#ffbb00; font-weight:bold;">Mr.Obruk</p>
-                        <button class="m-btn" style="font-size:11px; padding:5px;" onclick="buySkin('Mr.Obruk', 200, event)" id="skin-btn-2">200 ALTIN</button>
+                        <button class="m-btn" style="font-size:12px; padding:5px; margin-top:5px;" onclick="buySkin('Mr.Obruk', 200, event)" id="skin-btn-2">200 ALTIN</button>
                     </div>
                 </div>
-                <!-- İNTERNETTEN URL SKİN KOYMA ALANI -->
-                <div style="width:100%; border-top:1px dashed #ff6600; padding-top:10px;">
-                    <p style="font-size:13px; color:#ccc; margin-bottom:5px;">İnternetten Görsel Linkiyle Doku Yükle:</p>
-                    <input type="text" id="url-skin-input" placeholder="https://resim-linki.png" style="padding:6px; width:70%; background:#111; color:#fff; border:1px solid #ff6600;">
-                    <button class="m-btn" style="font-size:12px; padding:6px;" onclick="loadSkinFromURL(event)">Yükle</button>
+                <div style="margin-top:15px; border-top:1px dashed #ff6600; padding-top:10px; width:100%;">
+                    <p style="font-size:12px; color:#aaa; margin-bottom:5px;">İnternetten Görsel Linkiyle Skin Koy:</p>
+                    <input type="text" id="skin-url-field" placeholder="https://site.com/skin.png" style="padding:6px; background:#111; color:#fff; border:1px solid #ff6600; width:65%;">
+                    <button class="m-btn" style="font-size:11px; padding:6px; margin:0 0 0 5px;" onclick="injectSkinFromURL(event)">YÜKLE</button>
                 </div>
             </div>
 
-            <!-- ONLINE BAĞLANTI PENCERESİ -->
             <div id="window-online" class="sub-window">
                 <h3 style="color:#00f3ff; margin-bottom:10px;">ZOMBİSİZ 2 KİŞİLİK SUNUCU</h3>
                 <div style="display:flex; gap:10px; align-items:center;">
@@ -105,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- SİLAH VE ATÖLYE AYARLARI -->
             <div id="window-arsenal" class="sub-window">
                 <select id="weapon-select" onchange="updateWeaponSelection(event)" style="padding:5px; background:#111; color:#fff; border:1px solid #ff6600;">
                     <option value="1">Tabanca (Sabitleyicili - Dürbünsüz)</option>
@@ -118,7 +114,6 @@
                 <input type="file" id="photo-loader" accept="image/*" style="display:none;" onchange="uploadCustomPhotoSkin(event)">
             </div>
 
-            <!-- TEKRAR DOĞMA VE ZAFER EKRANLARI -->
             <div id="screen-death" style="display:none; margin-top:20px; text-align:center;">
                 <h2 style="font-size:50px; color:#ff0000; text-shadow:0 0 15px #ff0000; margin-bottom:10px;">ÖLDÜN</h2>
                 <button class="m-btn" style="border-color:#ff0000;" onclick="respawnGame(event)">TEKRAR DOĞ</button>
@@ -130,7 +125,6 @@
         </div>
     </div>
 
-    <!-- ================= OYUN HUD ALANI ================= -->
     <div id="game-interface">
         <div id="crosshair"></div>
         <div id="feed"></div>
@@ -145,9 +139,9 @@
         </div>
 
         <div id="controls-desc">
-            <b>[W,A,S,D]</b> Adım | <b>[SPACE]</b> Jump | <b>[SAĞ TIK]</b> Dürbün<br>
-            <b>💥 [R] TUŞUNA BAS: 3 FARKLI MINECRAFT F5 KAMERA MODU</b><br>
-            Kırmızı çeper dış sınır duvarına dikey tırmanma tamamen kapatıldı!
+            <b>[W, A, S, D]</b> Adım Hareketi | <b>[SPACE]</b> Zıplama | <b>[LEFT SHIFT]</b> Eğilme<br>
+            <b>💥 [R] TUŞU: 3 AŞAMALI MINECRAFT F5 MODU (ÖN/ARKA/FPS)</b><br>
+            <b>[SAĞ TIK]</b> Dürbün Aç (Tabanca Hariç) | Dış kırmızı sınır duvarına dikey tırmanma kapatıldı!
         </div>
     </div>
 
@@ -167,21 +161,20 @@
         let coverWalls = [], bots = [], potions = [], particles = [];
         let minimapCanvas, minimapCtx, currentWeaponMesh;
         let isWaveTransition = false, isGameActive = false;
-        let loadedCustomTexture = null, loadedUrlSkinTexture = null; 
+        let loadedCustomTexture = null, loadedUrlSkinTex = null; 
         let ignoreFirstMouseInput = false; 
         let isAiming = false; 
 
-        // 🧗‍♂️ F5 3-KAMERA PERSPEKTİF SİSTEMİ DEĞİŞKENLERİ
+        // 🧗‍♂️ MC 3 AŞAMALI F5 KAMERA VE MODEL DEĞİŞKENLERİ
         // Değerler: 'firstperson', 'thirdperson_back', 'thirdperson_front'
         let viewMode = 'firstperson';
         let playerSkinGroup = null;
-        let headMesh, bodyMesh, armLMesh, armRMesh, legLMesh, legRMesh; // Minecraft uzuv bağlantıları
+        let limbHead, limbBody, limbArmL, limbArmR, limbLegL, limbLegR;
 
-        // 🌐 ONLINE BAĞLANTI MATRİSLERİ
+        // 🌐 ONLINE P2P NETWORK DEĞİŞKENLERİ
         let peer = null, conn = null, isMultiplayer = false, isHost = false;
         let remotePlayer = null, remoteSkinGroup = null;
 
-        // Menü butonlarının alt katman yönetimi
         function openSub(id, e) {
             e.stopPropagation();
             document.getElementById('window-shop').style.display = 'none';
@@ -194,29 +187,29 @@
             swapWeapon(parseInt(document.getElementById('weapon-select').value));
         }
 
-        // 👤 HESAP DATA KAYDETME VE YÜKLEME SİSTEMİ (localStorage)
-        function saveAccountData(e) {
+        // 👤 ŞİFRELİ LOCALSTORAGE VERİ SAKLAMA MOTORU (Hesap Kaybını Önler)
+        function saveProfileData(e) {
             if(e) e.stopPropagation();
-            let name = document.getElementById('acc-name').value.trim();
-            let email = document.getElementById('acc-email').value.trim();
-            if(!name || !email) { alert("Lütfen isim ve e-posta alanlarını doldurun!"); return; }
+            let uName = document.getElementById('username-input').value.trim();
+            let uEmail = document.getElementById('email-input').value.trim();
+            if(!uName || !uEmail) { alert("Lütfen Oyuncu Adı ve E-posta giriniz!"); return; }
             
-            localStorage.setItem('bs_user_name', name);
-            localStorage.setItem('bs_user_email', email);
-            localStorage.setItem('bs_user_gold', playerStats.gold);
-            localStorage.setItem('bs_user_inv', JSON.stringify(playerStats.inventory));
-            localStorage.setItem('bs_user_skin', playerStats.activeSkin);
-            alert("Hesap Verileriniz Başarıyla Tarayıcıya Kilitlendi!");
+            localStorage.setItem('bs_cloud_name', uName);
+            localStorage.setItem('bs_cloud_email', uEmail);
+            localStorage.setItem('bs_cloud_gold', playerStats.gold);
+            localStorage.setItem('bs_cloud_inv', JSON.stringify(playerStats.inventory));
+            localStorage.setItem('bs_cloud_skin', playerStats.activeSkin);
+            alert("Hesap verileriniz tarayıcı bulutuna kilitlendi! Skorlar güvende.");
         }
 
-        function loadAccountData() {
-            let savedName = localStorage.getItem('bs_user_name');
+        function loadProfileData() {
+            let savedName = localStorage.getItem('bs_cloud_name');
             if(savedName) {
-                document.getElementById('acc-name').value = savedName;
-                document.getElementById('acc-email').value = localStorage.getItem('bs_user_email');
-                playerStats.gold = parseInt(localStorage.getItem('bs_user_gold')) || 0;
-                playerStats.inventory = JSON.parse(localStorage.getItem('bs_user_inv')) || ['Varsayılan'];
-                playerStats.activeSkin = localStorage.getItem('bs_user_skin') || 'Varsayılan';
+                document.getElementById('username-input').value = savedName;
+                document.getElementById('email-input').value = localStorage.getItem('bs_cloud_email');
+                playerStats.gold = parseInt(localStorage.getItem('bs_cloud_gold')) || 0;
+                playerStats.inventory = JSON.parse(localStorage.getItem('bs_cloud_inv')) || ['Varsayılan'];
+                playerStats.activeSkin = localStorage.getItem('bs_cloud_skin') || 'Varsayılan';
                 
                 document.getElementById('gold-val').innerText = playerStats.gold;
                 document.getElementById('shop-gold').innerText = playerStats.gold;
@@ -226,6 +219,7 @@
         }
 
         const blocker = document.getElementById('blocker');
+        
         blocker.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.tagName === 'OPTION') return;
             if (playerStats.hp <= 0) return;
@@ -272,17 +266,17 @@
             currentWeaponMesh.position.set(0.25, -0.25, -0.5);
             camera.add(currentWeaponMesh);
 
-            // 🕺 GERÇEK MINECRAFT ANATOMİK UZUV SİSTEMİ (Steve Model)
+            // 🕺 MC KUTUSAL VÜCUT MODELLEMESİ (Steve Ana İskelet)
             playerSkinGroup = new THREE.Group();
-            playerSkinGroup.position.y = -0.8; // Karakter merkez hizalama
+            playerSkinGroup.position.y = -0.85; // Boy hizası eşitlemesi
             player.add(playerSkinGroup);
-            buildMinecraftSkinEngine();
+            buildMinecraftSteveModel();
 
-            // 🌐 ONLINE RAKİP MODEL YAPISI VE SKIN ALANI
+            // 🌐 ONLINE RAKİP MODEL MOTORU
             remotePlayer = new THREE.Group();
             remoteSkinGroup = new THREE.Group();
             remotePlayer.add(remoteSkinGroup);
-            buildRemoteSteveEngine();
+            buildRemotePlayerModel();
             remotePlayer.position.set(0, -999, 0); 
             scene.add(remotePlayer);
 
@@ -310,7 +304,7 @@
             createSmallMountain(45, 25, 8, 12);  
             createSmallMountain(0, -50, 6, 9);    
             
-            // 🛑 KİLİTLİ SINIR DUVARLARI (isBoundary: true -> Dikey tırmanma engelli!)
+            // 🛑 SINIR DUVARLARI (isBoundary: true -> Tırmanma tamamen engelli!)
             createCyberWall(0, 0, -60, 140, 25, 2, 0x050f08, true);
             createCyberWall(-60, 0, 0, 2, 25, 140, 0x050f08, true);
             createCyberWall(60, 0, 0, 2, 25, 140, 0x050f08, true);
@@ -324,7 +318,7 @@
             spawnStaticPotion(-20, -15);
             spawnStaticPotion(20, -15);
 
-            loadAccountData(); // Hafızadaki kullanıcıyı yükle
+            loadProfileData(); // Tarayıcı verilerini çek
             startZombieWave();
             buildWeaponVisual();
 
@@ -340,69 +334,83 @@
             animate();
         }
 
-        // 🕺 MINECRAFT GERÇEK ANATOMİK VÜCUT SİSTEMİ (Steve Default)
-        function buildMinecraftSkinEngine() {
-            let clr = 0xff6600;
-            if (playerStats.activeSkin === 'Skyemau5') clr = 0x00f3ff;
-            if (playerStats.activeSkin === 'Mr.Obruk') clr = 0xffaa00;
+        // 🕺 STEVE MODEL OLUŞTURMA MOTORU
+        function buildMinecraftSteveModel() {
+            while(playerSkinGroup.children.length > 0) { playerSkinGroup.remove(playerSkinGroup.children[0]); }
+            let colorHex = 0xff6600;
+            if (playerStats.activeSkin === 'Skyemau5') colorHex = 0x00f3ff;
+            if (playerStats.activeSkin === 'Mr.Obruk') colorHex = 0xffaa00;
 
-            let skinMat = loadedUrlSkinTexture ? new THREE.MeshStandardMaterial({ map: loadedUrlSkinTexture }) : new THREE.MeshStandardMaterial({ color: 0xffdbac });
-            let clothMat = loadedUrlSkinTexture ? skinMat : new THREE.MeshStandardMaterial({ color: 0x111111 });
-            let armorMat = loadedUrlSkinTexture ? skinMat : new THREE.MeshBasicMaterial({ color: clr });
+            let skinMaterial = loadedUrlSkinTex ? new THREE.MeshStandardMaterial({ map: loadedUrlSkinTex }) : new THREE.MeshStandardMaterial({ color: 0xffdbac });
+            let shirtMaterial = loadedUrlSkinTex ? skinMaterial : new THREE.MeshStandardMaterial({ color: 0x111111 });
+            let armorMaterial = loadedUrlSkinTex ? skinMaterial : new THREE.MeshBasicMaterial({ color: colorHex });
 
-            // Kafa (Küp Steve)
-            headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), skinMat);
-            headMesh.position.y = 0.55;
+            // Kafa
+            limbHead = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), skinMaterial);
+            limbHead.position.y = 0.55;
             
-            // Gövde
-            bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.6, 0.22), clothMat);
-            bodyMesh.position.y = 0.1;
-            
-            let armorPlate = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.35, 0.25), armorMat);
-            armorPlate.position.set(0, 0.08, 0); bodyMesh.add(armorPlate);
+            // Gövde & Neon Zırh Plakası
+            limbBody = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.65, 0.24), shirtMaterial);
+            limbBody.position.y = 0.1;
+            let plate = new THREE.Mesh(new THREE.BoxGeometry(0.51, 0.38, 0.27), armorMaterial);
+            plate.position.set(0, 0.08, 0); limbBody.add(plate);
 
             // Kollar
-            armLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), clothMat);
-            armLMesh.position.set(-0.29, 0.1, 0);
-            
-            armRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), clothMat);
-            armRMesh.position.set(0.29, 0.1, 0);
+            limbArmL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), shirtMaterial);
+            limbArmL.position.set(-0.3, 0.1, 0);
+            limbArmR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), shirtMaterial);
+            limbArmR.position.set(0.3, 0.1, 0);
 
             // Bacaklar
-            legLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.55, 0.13), new THREE.MeshStandardMaterial({ color: 0x021105 }));
-            legLMesh.position.set(-0.12, -0.45, 0);
+            limbLegL = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.55, 0.13), new THREE.MeshStandardMaterial({ color: 0x031c07 }));
+            limbLegL.position.set(-0.12, -0.45, 0);
+            limbLegR = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.55, 0.13), new THREE.MeshStandardMaterial({ color: 0x031c07 }));
+            limbLegR.position.set(0.12, -0.45, 0);
 
-            legRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.55, 0.13), new THREE.MeshStandardMaterial({ color: 0x021105 }));
-            legRMesh.position.set(0.12, -0.45, 0);
-
-            playerSkinGroup.add(headMesh, bodyMesh, armLMesh, armRMesh, legLMesh, legRMesh);
-            playerSkinGroup.visible = false;
+            playerSkinGroup.add(limbHead, limbBody, limbArmL, limbArmR, limbLegL, limbLegR);
+            playerSkinGroup.visible = false; // FPS modda gizle
         }
 
-        function buildRemoteSteveEngine() {
-            let head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({ color: 0xffdbac })); head.position.y = 0.55;
-            let body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x111111 })); body.position.y = 0.1;
-            let armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), new THREE.MeshStandardMaterial({ color: 0x00f3ff })); armL.position.set(-0.29, 0.1, 0);
-            let armR = armL.clone(); armR.position.x = 0.29;
-            let legL = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.55, 0.13), new THREE.MeshStandardMaterial({ color: 0x021105 })); legL.position.set(-0.12, -0.45, 0);
-            let legR = legL.clone(); legR.position.x = 0.12;
-            remoteSkinGroup.add(head, body, armL, armR, legL, legR);
+        function buildRemotePlayerModel() {
+            let h = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), new THREE.MeshStandardMaterial({ color: 0xffdbac })); h.position.y = 0.55;
+            let b = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.65, 0.24), new THREE.MeshStandardMaterial({ color: 0x111111 })); b.position.y = 0.1;
+            let al = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.12), new THREE.MeshStandardMaterial({ color: 0x00f3ff })); al.position.set(-0.3, 0.1, 0);
+            let ar = al.clone(); ar.position.x = 0.3;
+            let ll = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.55, 0.13), new THREE.MeshStandardMaterial({ color: 0x031c07 })); ll.position.set(-0.12, -0.45, 0);
+            let lr = ll.clone(); lr.position.x = 0.12;
+            remoteSkinGroup.add(h, b, al, ar, ll, lr);
         }
 
-        // 🖼️ URL ÜZERİNDEN GEÇERLİ MINECRAFT SKIN RESMİ SARMAL MOTORU
-        function loadSkinFromURL(e) {
+        // 🖼️ URL LİNKİNDEN GERÇEK RESMİ MODELİN ÜZERİNE GİYDİRME APARATI
+        function injectSkinFromURL(e) {
             e.stopPropagation();
-            let url = document.getElementById('url-skin-input').value.trim();
-            if(!url) return;
+            let skinUrl = document.getElementById('skin-url-field').value.trim();
+            if(!skinUrl) return;
             
-            let tLoader = new THREE.TextureLoader();
-            tLoader.load(url, function(tex) {
-                loadedUrlSkinTexture = tex;
-                buildMinecraftSkinEngine();
+            let texLoader = new THREE.TextureLoader();
+            texLoader.load(skinUrl, function(texture) {
+                loadedUrlSkinTex = texture;
+                buildMinecraftSteveModel();
                 alert("İnternet Doku Skini Karakterinize Giydirildi!");
             }, undefined, function() {
-                alert("Resim yüklenemedi! Linki kontrol edin.");
+                alert("Resim yüklenemedi! Linkin gizli sekmede erişilebilir olduğundan emin olun.");
             });
+        }
+
+        function buySkin(name, cost, e) {
+            e.stopPropagation();
+            if (playerStats.inventory.includes(name)) {
+                playerStats.activeSkin = name; loadedUrlSkinTex = null; buildMinecraftSteveModel();
+                showFeed(name.toUpperCase() + " SKIN KUŞANILDI!"); return;
+            }
+            if (playerStats.gold >= cost) {
+                playerStats.gold -= cost; playerStats.inventory.push(name); playerStats.activeSkin = name;
+                document.getElementById('gold-val').innerText = playerStats.gold;
+                document.getElementById('shop-gold').innerText = playerStats.gold;
+                document.getElementById(name === 'Skyemau5' ? 'skin-btn-1' : 'skin-btn-2').innerText = "KUŞAN";
+                loadedUrlSkinTex = null; buildMinecraftSteveModel(); showFeed(name.toUpperCase() + " SATIN ALINDI!");
+                saveProfileData(); // Altın durumunu yerel hafızaya işle
+            } else { alert("Yetersiz Altın!"); }
         }
 
         function createCyberWall(x, y, z, w, h, d, color, isBoundaryWall) {
@@ -431,19 +439,81 @@
             zoneMesh.rotation.x = -Math.PI / 2; zoneMesh.position.set(x, 0.02, z); scene.add(zoneMesh);
         }
 
-        // ================= ⚔️ SİLAH GELİŞTİRME: UÇ BARRELLER VE DİK BIÇAK ATÖLYESİ =================
+        function spawnStaticPotion(x, z) {
+            let group = new THREE.Group();
+            let bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.25, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x00ff44, emissive: 0x008811 }));
+            group.add(bottle); group.position.set(x, 0.3, z); scene.add(group); potions.push(group);
+        }
+
+        function uploadCustomPhotoSkin(event) {
+            let file = event.target.files[0]; if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let textureLoader = new THREE.TextureLoader();
+                textureLoader.load(e.target.result, function(texture) {
+                    loadedCustomTexture = texture; buildWeaponVisual(); alert("Silah Skin Kaplaması Yapıldı!");
+                });
+            }; reader.readAsDataURL(file);
+        }
+
+        function startZombieWave() {
+            isWaveTransition = false;
+            document.getElementById('wave-banner').innerText = "";
+            document.getElementById('wave-val').innerText = playerStats.wave;
+            
+            if (isMultiplayer) {
+                bots.forEach(b => scene.remove(b.mesh)); bots = [];
+                document.getElementById('wave-hud-box').innerHTML = "MOD: <span>ONLINE 1VS1</span>";
+                return;
+            }
+
+            let zombieCount = Math.min(32, Math.pow(2, playerStats.wave)); 
+            let hpMultiplier = 100 + (playerStats.wave - 1) * 20;
+            let speedMultiplier = 0.045 + (playerStats.wave - 1) * 0.006;
+            let damageMultiplier = 10 + (playerStats.wave - 1) * 2;
+
+            for (let i = 0; i < zombieCount; i++) {
+                let rx, rz;
+                do {
+                    rx = (Math.random() - 0.5) * 110; rz = (Math.random() - 0.5) * 110;
+                } while (checkWallCollision(rx, rz) || Math.abs(rx - player.position.x) < 15);
+
+                let isFlyingBot = (playerStats.wave >= 7 && Math.random() > 0.4);
+                let zombieGroup = new THREE.Group();
+                let body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.2, 0.45), new THREE.MeshStandardMaterial({ color: isFlyingBot ? 0x3d5a80 : 0x2a363b }));
+                body.position.y = 1.0;
+                let armor = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.45, 0.52), new THREE.MeshStandardMaterial({ color: isFlyingBot ? 0x00f3ff : 0xff6600, metalness: 0.6 }));
+                armor.position.set(0, 1.15, 0); zombieGroup.add(body, armor);
+
+                let head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), new THREE.MeshStandardMaterial({ color: 0x141f22 })); head.position.y = 1.75; zombieGroup.add(head);
+                let eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0000 })); eyeL.position.set(-0.08, 1.8, -0.2);
+                let eyeR = eyeL.clone(); eyeR.position.x = 0.08; zombieGroup.add(eyeL, eyeR);
+                let gun = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.8), new THREE.MeshStandardMaterial({ color: 0x050505 })); gun.position.set(0.35, 1.1, -0.4); zombieGroup.add(gun);
+
+                if (isFlyingBot) {
+                    let jetpackL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.35), new THREE.MeshStandardMaterial({ color: 0x4a4a4a })); jetpackL.position.set(-0.22, 1.0, 0.24);
+                    let fireL = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12), new THREE.MeshBasicMaterial({ color: 0xff6600 })); fireL.position.set(-0.22, 0.78, 0.24); fireL.rotation.x = Math.PI;
+                    zombieGroup.add(jetpackL, fireL); zombieGroup.position.set(rx, 4.5, rz);
+                } else { zombieGroup.position.set(rx, 0, rz); }
+
+                scene.add(zombieGroup);
+                bots.push({ mesh: zombieGroup, hp: hpMultiplier, maxHp: hpMultiplier, angle: Math.random() * Math.PI * 2, speed: Math.min(0.09, speedMultiplier), damage: damageMultiplier, lastAttack: 0, isFleeing: false, isFlying: isFlyingBot });
+            }
+            showFeed("DALGA " + playerStats.wave + " BAŞLADI!");
+        }
+
+        // ================= 🔫 SİLAH RE-DESIGN: SİLAHLARA SİBER NAMLU UCU VE DİK BIÇAK =================
         function buildWeaponVisual() {
             while(currentWeaponMesh.children.length > 0){ currentWeaponMesh.remove(currentWeaponMesh.children[0]); }
             let wep = weaponsData[playerStats.weaponIndex];
             let weaponMaterial = loadedCustomTexture ? new THREE.MeshStandardMaterial({ map: loadedCustomTexture, roughness: 0.4 }) : new THREE.MeshStandardMaterial({ color: wep.color, roughness: 0.5 });
 
-            // 🛠️ BIÇAK: TAMAMEN DİK (DİKEY) DURUŞ KAMA MODELİ
+            // 🛠️ BIÇAK GÜNCELLEMESİ: TAMAMEN DİK VE GERÇEKÇİ KAMA TUTUŞU
             if (wep.name === 'Bıçak') {
-                let handle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.12, 0.03), new THREE.MeshStandardMaterial({ color: 0x222222 }));
-                handle.position.y = -0.06; // Tutma sapı altta
-                
-                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.24, 0.04), weaponMaterial);
-                blade.position.y = 0.12; // Gümüş kama gövdesi dik olarak yukarı uzanır
+                let handle = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.11, 0.03), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+                handle.position.y = -0.06; 
+                let blade = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.22, 0.04), weaponMaterial);
+                blade.position.y = 0.1; 
                 currentWeaponMesh.add(handle, blade);
             } 
             else if (wep.name === 'Tabanca') {
@@ -451,24 +521,23 @@
                 let grip = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.07, 0.04), new THREE.MeshStandardMaterial({ color: 0x111111 })); grip.position.set(0, -0.08, 0.02);
                 let stabilizer = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.02, 0.1), new THREE.MeshStandardMaterial({ color: 0x333333 })); stabilizer.position.set(0, -0.07, -0.04);
                 
-                // 💥 SİLAHIN UCU (Muzzle barrel tip)
+                // 💥 BİRLEŞİK NAMLU UCU APARATI (Muzzle barrel tip)
                 let muzzleTip = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.04), new THREE.MeshStandardMaterial({ color: 0xff6600 }));
                 muzzleTip.rotation.x = Math.PI / 2; muzzleTip.position.set(0, -0.04, -0.13);
-
+                
                 currentWeaponMesh.add(body, grip, stabilizer, muzzleTip);
             } 
             else {
                 let length = 0.55;
                 let body = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, length), weaponMaterial); body.position.y = -0.04;
                 let scopeMount = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.04, 0.06), new THREE.MeshStandardMaterial({ color: 0x111111 })); scopeMount.position.set(0, -0.01, -0.02);
-                
                 let scopeLength = wep.name === 'Sniper' ? 0.24 : 0.14;
                 let scope = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, scopeLength, 16, 1, true), new THREE.MeshStandardMaterial({ color: 0x050505, side: THREE.DoubleSide }));
                 scope.rotation.x = Math.PI / 2; scope.position.set(0, 0.03, -0.02);
                 
-                // 💥 SİLAHIN UCU (Ağır namlu ucu detayı eklendi)
-                let muzzleTip = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.06), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-                muzzleTip.rotation.x = Math.PI / 2; muzzleTip.position.set(0, -0.04, -(length/2 + 0.05));
+                // 💥 BİRLEŞİK AĞIR NAMLU UCU APARATI
+                let muzzleTip = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.05), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+                muzzleTip.rotation.x = Math.PI / 2; muzzleTip.position.set(0, -0.04, -(length/2 + 0.04));
 
                 currentWeaponMesh.add(body, scopeMount, scope, muzzleTip);
             }
@@ -506,7 +575,7 @@
                             else if (minOverlap === overlapZ1) player.position.z = w.minZ - pRadius;
                             else if (minOverlap === overlapZ2) player.position.z = w.maxZ + pRadius;
                             
-                            // 🛑 DÜZELTME: Sınır koruma duvarı ise (`w.isBoundary`) dikey tırmanmayı engelle!
+                            // Sınır koruma duvarı (`w.isBoundary === true`) ise dikey tırmanmayı engelle!
                             if (moveF && feetY < w.height - 0.2 && !w.isBoundary) { yVel = 0.08; }
                         }
                     }
@@ -518,51 +587,51 @@
                 let limitY = isCrouch ? 0.9 : 1.6;
                 if (player.position.y <= limitY) { player.position.y = limitY; yVel = 0; isJump = false; }
             }
+
+            for(let i = potions.length - 1; i >= 0; i--) {
+                if(player.position.distanceTo(potions[i].position) < 1.5) {
+                    playerStats.hp = Math.min(100, playerStats.hp + 35); document.getElementById('hp-val').innerText = playerStats.hp;
+                    showFeed("CAN ALINDI (+35)"); scene.remove(potions[i]); potions.splice(i, 1);
+                }
+            }
         }
 
-        function swapWeapon(index) {
-            isAiming = false; camera.fov = 75; camera.updateProjectionMatrix(); 
-            playerStats.weaponIndex = index; playerStats.currentWeapon = weaponsData[index].name;
-            document.getElementById('weapon-val').innerText = playerStats.currentWeapon;
-            showFeed(playerStats.currentWeapon.toUpperCase() + " SEÇİLDİ"); buildWeaponVisual();
-        }
-
-        // ================= 🌐 MULTIPLAYER NETWORK MODÜLÜ VE HATA YÖNETİMİ =================
+        // ================= 🌐 ONLİNE MULTIPLAYER VE KOD DOĞRULAMA KONTROLLERİ =================
         function hostRoom(e) {
-            e.stopPropagation(); document.getElementById('host-code').innerText = "Oda açılıyor...";
+            e.stopPropagation(); document.getElementById('host-code').innerText = "Oda kuruluyor...";
             peer = new Peer();
             peer.on('open', (id) => { document.getElementById('host-code').innerHTML = "KODUNUZ: <span style='color:#fff; background:#222; padding:3px; border:1px solid #ff6600;'>" + id + "</span>"; });
             
-            // 🚨 HATA DENETLEYİCİSİ (Geçersiz oda durumları)
             peer.on('error', (err) => {
-                if(err.type === 'peer-unavailable') { alert("Geçersiz Oda Kodu! Böyle bir oda bulunamadı."); respawnGame(); }
+                if(err.type === 'peer-unavailable') { alert("Geçersiz Oda Kodu!"); respawnGame(); }
             });
-
             peer.on('connection', (c) => { conn = c; isMultiplayer = true; isHost = true; setupNetwork(); renderer.domElement.requestPointerLock(); });
         }
 
         function joinRoom(e) {
-            e.stopPropagation(); let id = document.getElementById('join-code-input').value.trim(); if(!id) return;
+            e.stopPropagation(); let id = document.getElementById('join-code-input').value.trim();
+            if(!id) return;
             peer = new Peer();
             
             peer.on('open', () => { 
                 conn = peer.connect(id); isMultiplayer = true; isHost = false; setupNetwork(); 
             });
 
+            // Oda kodu sistemde yoksa tetiklenen geçersiz kod filtresi
             peer.on('error', (err) => {
-                if(err.type === 'peer-unavailable' || err.type === 'network') { 
-                    alert("Geçersiz Oda Kodu! Bağlantı kurulamadı."); 
-                    location.reload();
+                if(err.type === 'peer-unavailable') { 
+                    alert("Geçersiz Oda Kodu! Böyle bir sunucu odası bulunamadı."); 
+                    location.reload(); // Lobiyi güvenle sıfırla
                 }
             });
         }
 
         function setupNetwork() {
-            showFeed("ONLINE SEANSA BAĞLANILDI!"); startZombieWave(); 
+            showFeed("ONLINE LOBİYE BAĞLANILDI!"); startZombieWave(); 
             conn.on('data', (data) => {
                 if (data.type === 'move') { 
                     remotePlayer.position.set(data.x, data.y - 1.6, data.z); remotePlayer.rotation.y = data.ry; 
-                    // Rakibin bacak sallama senkronizasyonu
+                    // Rakip uzuv animasyon aktarımı
                     remoteSkinGroup.children[4].rotation.x = data.legL;
                     remoteSkinGroup.children[5].rotation.x = data.legR;
                 }
@@ -593,7 +662,7 @@
             let dynamicSens = isAiming ? mouseSens * 0.4 : mouseSens;
             player.rotation.y -= e.movementX * dynamicSens;
             
-            // 🛡️ BÜYÜK DÜZELTME: camera.rotation.x değerini mouse ile serbestçe güncelliyoruz (Aşağı yukarı bakış aktif)
+            // 🛡️ BÜYÜK DÜZELTME: dikey bakışın (aşağı-yukarı) her karede kilitlenip silinmesini düzelttik!
             camera.rotation.x -= e.movementY * dynamicSens;
             camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
         }
@@ -608,11 +677,11 @@
                 case 'Space': if(!isJump){ yVel = 0.21; isJump = true; } break;
                 case 'ShiftLeft': isCrouch = true; break;
                 
-                // 🧗‍♂️ 3 KADEMELİ MINECRAFT F5 PERSPEKTİF MOTORU (R TUŞU DÖNGÜSÜ)
+                // 💥 3 AŞAMALİ MINECRAFT F5 KAMERA DEĞİŞTİRME DÖNGÜSÜ
                 case 'KeyR':
                     if (viewMode === 'firstperson') {
                         viewMode = 'thirdperson_back';
-                        playerSkinGroup.visible = true; 
+                        playerSkinGroup.visible = true;
                     } else if (viewMode === 'thirdperson_back') {
                         viewMode = 'thirdperson_front';
                         playerSkinGroup.visible = true;
@@ -620,7 +689,7 @@
                         viewMode = 'firstperson';
                         playerSkinGroup.visible = false;
                     }
-                    showFeed("KAMERA MODU: " + viewMode.toUpperCase());
+                    showFeed("BAKIŞ MODU: " + viewMode.toUpperCase());
                     break;
                 case 'Digit1': swapWeapon(0); break;
                 case 'Digit2': swapWeapon(1); break;
@@ -642,90 +711,62 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            let time = Date.now();
+            let timeStamp = Date.now();
 
             if (document.pointerLockElement === renderer.domElement && isGameActive) {
                 processPhysics();
-                if(!isMultiplayer) { // Online değilse zombileri oynat
-                     // Zombi süreç motorları (Dahili)
-                     let now = Date.now();
-                     bots.forEach(zomb => {
-                        let distance = zomb.mesh.position.distanceTo(player.position);
-                        if (zomb.hp < zomb.maxHp * 0.40) zomb.isFleeing = true;
-                        if (zomb.isFleeing) {
-                            let fleeAngle = Math.atan2(zomb.mesh.position.z - player.position.z, zomb.mesh.position.x - player.position.x);
-                            zomb.mesh.rotation.y = -fleeAngle + Math.PI / 2;
-                            zomb.mesh.position.x += Math.cos(fleeAngle) * (zomb.speed * 1.3);
-                            zomb.mesh.position.z += Math.sin(fleeAngle) * (zomb.speed * 1.3);
-                        } else {
-                            zomb.mesh.lookAt(new THREE.Vector3(player.position.x, zomb.mesh.position.y, player.position.z));
-                            if (zomb.isFlying) {
-                                zomb.mesh.position.y = 4.2 + Math.sin(now * 0.002) * 0.4;
-                                let angleToPlayer = Math.atan2(player.position.z - zomb.mesh.position.z, player.position.x - zomb.mesh.position.x);
-                                if (distance > 12) { zomb.mesh.position.x += Math.cos(angleToPlayer) * zomb.speed; zomb.mesh.position.z += Math.sin(angleToPlayer) * zomb.speed; }
-                            } else {
-                                if (distance > 14) { zomb.mesh.position.x += Math.cos(zomb.angle) * zomb.speed; zomb.mesh.position.z += Math.sin(zomb.angle) * zomb.speed; if (checkWallCollision(zomb.mesh.position.x, zomb.mesh.position.z)) { zomb.angle += Math.PI / 2; } }
-                            }
-                            let rangeLimit = zomb.isFlying ? 25 : 14;
-                            if (distance <= rangeLimit && now - zomb.lastAttack > 1800) {
-                                playerStats.hp -= zomb.damage; document.getElementById('hp-val').innerText = playerStats.hp;
-                                createEnemyLaserTracer(zomb.mesh.position, player.position, zomb.isFlying); zomb.lastAttack = now;
-                                if(playerStats.hp <= 0) { isGameActive = false; document.exitPointerLock(); showDeathScreen(); }
-                            }
-                        }
-                     });
-                }
-                
-                // Parçacık süreç motoru
-                for(let i = particles.length - 1; i >= 0; i--) { let p = particles[i]; p.mesh.position.y += p.vY; p.life--; if(p.life <= 0) { scene.remove(p.mesh); particles.splice(i, 1); } }
+                processZombies();
+                processParticles();
 
-                // ================= 🕺 MINECRAFT GERÇEK YÜRÜYÜŞ ANİMASYON MOTORU =================
-                if (moveF || moveB || moveL || moveR) {
-                    let wave = Math.sin(time * 0.01) * 0.6; // Sallantı frekans katsayısı
-                    legLMesh.rotation.x = wave;
-                    legRMesh.rotation.x = -wave;
-                    armLMesh.rotation.x = -wave;
-                    armRMesh.rotation.x = wave;
-                } else {
-                    // Dururken uzuvları dik pozisyona eşitle
-                    legLMesh.rotation.x = 0; legRMesh.rotation.x = 0;
-                    armLMesh.rotation.x = 0; armRMesh.rotation.x = 0;
-                }
-
-                // 🌐 ONLİNE MOD BAĞLANTI PAKETİ SENKRONU
+                // 🌐 ONLINE LOBIDE VERI ALIVERİŞ SENKRONU
                 if (isMultiplayer && conn) { 
-                    conn.send({ type: 'move', x: player.position.x, y: player.position.y, z: player.position.z, ry: player.rotation.y, legL: legLMesh.rotation.x, legR: legRMesh.rotation.x }); 
+                    conn.send({ type: 'move', x: player.position.x, y: player.position.y, z: player.position.z, ry: player.rotation.y, legL: limbLegL.rotation.x, legR: limbLegR.rotation.x }); 
                 }
 
-                // ================= 🎥 3 FARKLI F5 KAMERA AÇISI MATRİS YÖNETİMİ =================
-                let targetWeaponPos = new THREE.Vector3(0.24, -0.24, -0.45); 
+                // ================= 🕺 GERÇEK MINECRAFT ANİMATRONİK YÜRÜYÜŞ MOTORU =================
+                if (moveF || moveB || moveL || moveR) {
+                    let swingWave = Math.sin(timeStamp * 0.01) * 0.65; // Orijinal MC sallantı hızı
+                    limbLegL.rotation.x = swingWave;
+                    limbLegR.rotation.x = -swingWave;
+                    limbArmL.rotation.x = -swingWave;
+                    limbArmR.rotation.x = swingWave;
+                } else {
+                    // Dururken uzuvları düz pozisyona eşitle
+                    limbLegL.rotation.x = 0; limbLegR.rotation.x = 0;
+                    limbArmL.rotation.x = 0; limbArmR.rotation.x = 0;
+                }
+
+                // ================= 🎥 3 FARKLI F5 KAMERA PERSPEKTİF YÖNETİM MATRİSİ =================
+                let targetWeaponPos = new THREE.Vector3(0.25, -0.25, -0.5); 
                 let targetWeaponScale = new THREE.Vector3(1, 1, 1);
 
                 if (viewMode === 'thirdperson_back') {
-                    // Kamera karakterin arkasından takip eder (Steve Sırt Görünümü)
+                    // Steve Sırt Görünümü (Kamera arkaya kayar)
                     camera.position.set(0, 0.6, 2.8); 
-                    currentWeaponMesh.visible = false; 
+                    camera.rotation.y = 0; // Doğrudan ileri baksın
+                    currentWeaponMesh.visible = false;
                 } 
                 else if (viewMode === 'thirdperson_front') {
-                    // Kamera karakterin tam önünden bakar (Steve Yüz Görünümü)
+                    // Steve Yüz Görünümü (Kamera öne geçer ve 180 derece arkaya bakar)
                     camera.position.set(0, 0.6, -2.8);
-                    camera.rotation.y = Math.PI; // Kamerayı 180 derece ters çevirerek yüze baktırma
+                    camera.rotation.y = Math.PI; // Kamerayı oyuncunun yüzüne çevirir
                     currentWeaponMesh.visible = false;
                 } 
                 else {
-                    // Varsayılan FPS Modu (1. Şahıs)
+                    // Orijinal Birinci Şahıs FPS Görünümü
                     currentWeaponMesh.visible = true;
-                    camera.position.set(0, 0, 0); // Kamerayı orijinal kafa merkezine sıfırla
-                    
-                    // 🛡️ DÜZELTME: camera.rotation.y değerini sıfırlamıyoruz! Sadece FPS modda x ekseni mouse'tan besleniyor
-                    camera.rotation.y = 0; 
+                    camera.position.set(0, 0, 0); // Kamerayı kafa merkezine eşitle
+                    camera.rotation.y = 0; // 🛡️ SADECE Y ROTASYONU SIFIRLANIR! X (dikey) özgür bırakıldı.
 
                     if (isAiming) {
                         if (playerStats.weaponIndex === 1) { 
-                            // Sabitleyicili Tabanca Göz Hizası
-                            targetWeaponPos.set(0, -0.042, -0.2); targetWeaponScale.set(1.4, 1.4, 1.0); 
+                            // Sabitleyicili Tabanca Göz Hizası (Gövde içi görünmez)
+                            targetWeaponPos.set(0, -0.045, -0.22); 
+                            targetWeaponScale.set(1.5, 1.5, 1.0);
                         } else if (playerStats.weaponIndex !== 0) { 
-                            targetWeaponPos.set(0, -0.03, -0.22); targetWeaponScale.set(2.4, 2.4, 1.2); 
+                            // Entegre Delikli Dürbün Tam Eksen Hizalaması
+                            targetWeaponPos.set(0, -0.03, -0.22); 
+                            targetWeaponScale.set(2.4, 2.4, 1.2); 
                         }
                     }
                 }
